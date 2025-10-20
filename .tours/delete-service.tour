@@ -1,0 +1,36 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "delete Service",
+  "steps": [
+    {
+      "file": "src/app/services/productos.service.ts",
+      "description": "Creamos la funcion de eliminar en el servicio que va resivir como parametro un id",
+      "line": 27
+    },
+    {
+      "file": "src/app/productos/productos.component.ts",
+      "description": "Creamos una funcion que va ser llamada para eliminar el producto que recibe un id",
+      "line": 110
+    },
+    {
+      "file": "src/app/productos/productos.component.ts",
+      "description": "esto manda un alert donde le pregunta al usuario si desea eliminar el producto y si decide que si entra a la funcion",
+      "line": 111
+    },
+    {
+      "file": "src/app/productos/productos.component.ts",
+      "description": "aqui elimina el producto el 'suscribe' significa si la api manda como exito entra a la funcion",
+      "line": 112
+    },
+    {
+      "file": "src/app/productos/productos.component.ts",
+      "description": "esto quiere decir que lo borra localmente para ver los cambios reflejados",
+      "line": 113
+    },
+    {
+      "file": "src/app/productos/productos.component.html",
+      "description": "manda a llamar la funcion de eliminar producto y le manda como parametro el id del producto para eliminarlo",
+      "line": 34
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+<h2 class="text-center my-5 display-6 fw-semibold text-primary">🖨️ Materiales</h2>
+
+<app-agregar-maquinas></app-agregar-maquinas>
+<!-- Botones PDF, Excel y Totales Mejor Acomodados -->
+<div class="d-flex justify-content-between align-items-center flex-wrap mb-4 gap-3">
+  <div class="text-end">
+    <button (click)="exportarPDF()"  class="btn btn-outline-danger me-2 d-inline-flex align-items-center gap-1">
+      <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+    </button>
+    <button (click)="exportarExcel()"  class="btn btn-outline-success d-inline-flex align-items-center gap-1">
+      <i class="bi bi-file-earmark-excel-fill"></i> Excel
+    </button>
+  </div>
+
+  <div class="text-end">
+    <p class="mb-1 fw-bold text-secondary">
+      TOTAL MATERIALES:
+      <span class="text-success">{{ totalMateriales() }}</span>
+    </p>
+    <p class="mb-1 fw-bold text-secondary">
+      TOTAL DINERO COMPRA:
+      <span class="text-success">{{ totalDineroDeCompra() }}</span>
+    </p>
+  </div>
+
+
+<!-- Buscador -->
+<div class="container my-3">
+  <div class="row">
+    <div class="col-md-4 ms-auto">
+      <input type="text" class="form-control form-control-sm" placeholder="🔍 Buscar por nombre"
+        [(ngModel)]="wordSearch">
+    </div>
+  </div>
+</div>
+
+<!-- Spinner -->
+<div class="text-center" *ngIf="SpinnerLoading">
+  <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+    <span class="visually-hidden">Cargando...</span>
+  </div>
+</div>
+
+
+<!-- Cards -->
+<div class="container">
+  <div class="row">
+    <div class="col-lg-4 col-md-6 mb-4" *ngFor="let material of FilterMaterials">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-header bg-primary text-white text-center">
+          <h5 class="mb-0 fw-semibold text-uppercase"> {{material.name}} </h5>
+        </div>
+        <div class="card-body text-center">
+          <img [src]="material.imagePath" class="img-fluid rounded mb-3" alt="Imagen del producto"
+            style="max-height: 150px; object-fit: contain;" (error)="onImageError($event)" />
+
+          <ul class="list-unstyled text-start small mb-4">
+            <li><strong>ID:</strong> {{material.id}} </li>
+            <li><strong>EXISTENCIA :</strong> {{material.existence}} </li>
+            <li><strong>PRECIO:</strong> ${{material.price}}</li>
+            <li><strong>PROVEDOR:</strong> {{material.supplier}}</li>
+            <li>
+              <strong>Último Ingreso:</strong> {{material.lastIncome | date: 'shortDate'}}
+            </li>
+          </ul>
+
+          <div class="d-grid gap-2">
+            <a [href]="material.buyLink" target="_blank" class="btn btn-outline-success">🛍️ Comprar</a>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+            (click)="modalEdit(material)"
+              data-bs-target="#editmodal">
+              ✏️ Editar
+            </button>
+            <button (click)="deleteMaterial(material.id)" class="btn btn-outline-danger">🗑️ Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para editar -->
+<div class="modal fade" id="editmodal" tabindex="-1" aria-labelledby="formeditLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-4 shadow-lg">
+      <form [formGroup]="editMaterial" (ngSubmit)="guardarEdit()">
+        <div class="modal-header bg-primary text-white rounded-top-4">
+          <h5 class="modal-title" id="formeditLabel">✏️ EDITAR MATERIAL</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">NOMBRE</label>
+            <input type="text" class="form-control" required formControlName="name">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">EXISTENCIA</label>
+            <input type="number" class="form-control" formControlName="existence" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">PRECIO</label>
+            <input type="number" class="form-control" formControlName="price" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">PROVEDOR</label>
+            <input type="text" class="form-control" formControlName="supplier" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">link DE COMPRA</label>
+            <input type="text" class="form-control" formControlName="buyLink" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">ULTIMO INGRESO</label>
+            <input type="date" class="form-control" formControlName="lastIncome" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">IMAGEN</label>
+            <input type="file" class="form-control" (change)="seleccionarArchivo($event)"  required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary rounded-pill" data-bs-dismiss="modal">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Toast de éxito -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+  <div #toastElement class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive"
+    aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        {{ toastMessage }}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+        aria-label="Close"></button>
+    </div>
+  </div>
+</div>

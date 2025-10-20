@@ -1,0 +1,63 @@
+<h2 class="text-center my-5 display-6 fw-semibold text-primary">📊 Reporte de Ventas</h2>
+
+<div class="card p-4 shadow-lg border-0 rounded-4 bg-white">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <!-- Filtros de fecha -->
+    <div class="d-flex flex-wrap gap-3">
+      <div>
+        <label for="fechaInicio" class="form-label mb-1 fw-semibold text-secondary">📅 Desde:</label>
+        <input id="fechaInicio" type="date" class="form-control rounded-3 shadow-sm" [(ngModel)]="fechaInicio"
+          (change)="filtrarPorFecha()" />
+      </div>
+      <div>
+        <label for="fechaFin" class="form-label mb-1 fw-semibold text-secondary">📅 Hasta:</label>
+        <input id="fechaFin" type="date" class="form-control rounded-3 shadow-sm" [(ngModel)]="fechaFin"
+          (change)="filtrarPorFecha()" />
+      </div>
+    </div>
+
+    <!-- Totales -->
+    <div class="text-end">
+      <p class="mb-1 fw-bold text-secondary">🧾 Total ventas:
+        <span class="text-success">${{ getTotalVentas() }}</span>
+      </p>
+      <p class="mb-0 fw-bold text-secondary">📦 Total unidades:
+        <span class="text-success">{{ getTotalUnidades() }}</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Botones de exportación -->
+  <div class="text-end mb-4">
+    <button class="btn btn-outline-danger me-2 d-inline-flex align-items-center gap-1" (click)="exportarPDF()">
+      <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+    </button>
+    <button class="btn btn-outline-success d-inline-flex align-items-center gap-1" (click)="exportarExcel()">
+      <i class="bi bi-file-earmark-excel-fill"></i> Excel
+    </button>
+  </div>
+
+  <!-- Tabla de datos -->
+  <div class="table-responsive rounded-3 overflow-hidden">
+    <table class="table table-bordered table-hover align-middle mb-0">
+      <thead class="table-primary text-center fw-bold">
+        <tr>
+          <th>#</th>
+          <th>Producto</th>
+          <th>Fecha</th>
+          <th>Unidades</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let venta of ventasFiltradas" class="text-center">
+          <th scope="row">{{ venta.ID }}</th>
+          <td class="text-start">{{ venta.PRODUCT_NAME }}</td>
+          <td>{{ venta.FECHA | date: 'mediumDate' }}</td>
+          <td>{{ venta.EXISTENCIA_DE_SALIDA }}</td>
+          <td class="text-success fw-semibold">${{ venta.DINERO_GENERADO }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

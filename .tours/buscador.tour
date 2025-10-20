@@ -1,0 +1,36 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "Buscador",
+  "steps": [
+    {
+      "file": "src/app/productos/productos.component.ts",
+      "description": "crear una variable la cual va guardar lo que nosotros queramos filtrar",
+      "line": 120
+    },
+    {
+      "file": "src/app/productos/productos.component.ts",
+      "description": "creamos una funcion la cual va servir para mandarla a llamar para filtrar por nombre los productos",
+      "line": 122
+    },
+    {
+      "file": "src/app/productos/productos.component.ts",
+      "description": "esto quiere decir que si la variable terminoBusqueda esta vacia regresar los productos como estan o como se muestran al inicio",
+      "line": 123
+    },
+    {
+      "file": "src/app/productos/productos.component.ts",
+      "description": "y si si hay algo en la variable va entrar a esta funcion la cual va filtrar los datos por nombre",
+      "line": 127
+    },
+    {
+      "file": "src/app/productos/productos.component.ts",
+      "description": "aqui lo va filtrar por nombre y los datos los convierte en minisuclas para que coinsidan en la busqueda",
+      "line": 128
+    },
+    {
+      "file": "src/app/productos/productos.component.html",
+      "description": "aqui se cambia en vez de let producto of productos lo cual manda a llamar el objeto que guarda los productos , ahora es productosFiltrados ya que ahi los esta guardando y es donde los va a filtrar por nombre",
+      "line": 19
+    }
+  ]
+}

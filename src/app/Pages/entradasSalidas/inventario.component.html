@@ -1,0 +1,235 @@
+<h2 class="text-center my-5 fw-bold text-primary display-5">⬅️➡️ Entradas/Salidas</h2>
+
+<div class="d-flex justify-content-between align-items-center flex-wrap mb-4 gap-3">
+    <div class="text-end">
+        <button (click)="selectProducts()" class="btn btn-outline-success me-2 d-inline-flex align-items-center gap-1">
+            PRODUCTOS
+        </button>
+        <button (click)="selectMaterial()" class="btn btn-outline-success d-inline-flex align-items-center gap-1">
+            MATERIALES
+        </button>
+    </div>
+
+    <div *ngIf="ProductosActive" class="container-fluid  min-vh-100 py-5">
+        <div class="container">
+            <!-- FORMULARIO DE BÚSQUEDA -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-md-6 col-lg-5">
+                    <form (ngSubmit)="onSubmit()" class="p-4 bg-white shadow rounded-4">
+                        <h1 class="mb-4 fs-4 fw-bold text-center text-secondary">Buscar Producto</h1>
+
+                        <input *ngIf="!findbyname" type="number" class="form-control mb-3"
+                            placeholder="Código del producto" [(ngModel)]="codigoProducto" name="codigoProducto"
+                            required>
+
+                        <input *ngIf="findbyname" type="text" class="form-control mb-3"
+                            placeholder="Nombre del producto" [(ngModel)]="nombreProducto" name="nombreProducto"
+                            required>
+
+                        <div class="form-check text-start mt-3">
+                            <input type="checkbox" class="form-check-input" id="buscarNombre"
+                                (change)="checkbox($event)">
+                            <label class="form-check-label text-black fw-bold" for="buscarNombre">Buscar Por
+                                Nombre</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            Buscar
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- CARD DE PRODUCTO -->
+            <div class="row justify-content-center" *ngIf="producto">
+                <div class="col-md-6 col-lg-5">
+                    <div class="card shadow border-0 rounded-4">
+
+                        <!-- Header -->
+                        <div class="card-header bg-primary text-white text-center rounded-top-4">
+                            <h5 class="mb-0 fw-semibold text-uppercase">{{ producto.NOMBRE }}</h5>
+                        </div>
+
+                        <!-- Body -->
+                        <div class="card-body text-center">
+
+                            <!-- Imagen -->
+                            <img [src]="producto.IMAGE_PATH" class="img-fluid rounded mb-3" alt="Imagen del producto"
+                                style="max-height: 180px; object-fit: contain;" (error)="onImageError($event)" />
+
+                            <!-- Datos del producto -->
+                            <ul class="list-unstyled text-start small mb-4">
+                                <li><strong>ID:</strong> {{ producto.ID_PRODUCT }}</li>
+                                <li><strong>PLU:</strong> {{ producto.PLU }}</li>
+                                <li><strong>Existencia:</strong> {{ producto.EXISTENCIA }}</li>
+                            </ul>
+
+                            <!-- Controles -->
+                            <div class="row g-2">
+                                <!-- Quitar existencia -->
+                                <div class="col-6">
+                                    <input type="number" class="form-control mb-2"
+                                        [(ngModel)]="cantidadQuitar[producto.ID_PRODUCT]"
+                                        placeholder="Cantidad a quitar">
+                                    <button type="button" class="btn btn-outline-danger w-100"
+                                        (click)="quitarExistencia(producto.ID_PRODUCT ,producto)">Quitar</button>
+                                </div>
+
+                                <!-- Agregar existencia -->
+                                <div class="col-6">
+                                    <input type="number" class="form-control mb-2"
+                                        [(ngModel)]="cantidadAgregar[producto.ID_PRODUCT]"
+                                        placeholder="Cantidad a agregar" required>
+                                    <button type="button" class="btn btn-outline-success w-100"
+                                        (click)="agregarExistencia(producto.ID_PRODUCT , producto)">Agregar</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <ng-container *ngIf="findbyname">
+                <div class="row justify-content-center" *ngFor="let producto of productosporname">
+                    <div class="col-md-6 col-lg-5">
+                        <div class="card shadow border-0 rounded-4">
+
+                            <!-- Header -->
+                            <div class="card-header bg-primary text-white text-center rounded-top-4">
+                                <h5 class="mb-0 fw-semibold text-uppercase">{{ producto.NOMBRE }}</h5>
+                            </div>
+
+                            <!-- Body -->
+                            <div class="card-body text-center">
+
+                                <!-- Imagen -->
+                                <img [src]="producto.IMAGE_PATH" class="img-fluid rounded mb-3"
+                                    alt="Imagen del producto" style="max-height: 180px; object-fit: contain;"
+                                    (error)="onImageError($event)" />
+
+                                <!-- Datos del producto -->
+                                <ul class="list-unstyled text-start small mb-4">
+                                    <li><strong>ID:</strong> {{ producto.ID_PRODUCT }}</li>
+                                    <li><strong>PLU:</strong> {{ producto.PLU }}</li>
+                                    <li><strong>Existencia:</strong> {{ producto.EXISTENCIA }}</li>
+                                </ul>
+
+                                <!-- Controles -->
+                                <div class="row g-2">
+                                    <!-- Quitar existencia -->
+                                    <div class="col-6">
+                                        <input type="number" class="form-control mb-2"
+                                            [(ngModel)]="cantidadQuitar[producto.ID_PRODUCT]"
+                                            placeholder="Cantidad a quitar">
+                                        <button type="button" class="btn btn-outline-danger w-100"
+                                            (click)="quitarExistencia(producto.ID_PRODUCT , producto)">Quitar</button>
+                                    </div>
+
+                                    <!-- Agregar existencia -->
+                                    <div class="col-6">
+                                        <input type="number" class="form-control mb-2"
+                                            [(ngModel)]="cantidadAgregar[producto.ID_PRODUCT]"
+                                            placeholder="Cantidad a agregar" required>
+                                        <button type="button" class="btn btn-outline-success w-100"
+                                            (click)="agregarExistencia(producto.ID_PRODUCT , producto)">Agregar</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+
+
+        </div>
+    </div>
+
+    <!-- material -->
+    <div *ngIf="MaterialActive" class="container-fluid  min-vh-100 py-5">
+        <div class="container">
+            <!-- FORMULARIO DE BÚSQUEDA -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-md-6 col-lg-5">
+                    <form (submit)="Materialsearchbyname()" class="p-4 bg-white shadow rounded-4">
+                        <h1 class="mb-4 fs-4 fw-bold text-center text-secondary">Buscar Material</h1>
+
+
+                        <input type="text" class="form-control mb-3" placeholder="Nombre del material"
+                            [(ngModel)]="nombreMaterial" name="MaterialName" required>
+
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            Buscar
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="row justify-content-center" *ngFor="let material of materiales">
+                <div class="col-md-6 col-lg-5">
+                    <div class="card shadow border-0 rounded-4">
+
+                        <!-- Header -->
+                        <div class="card-header bg-primary text-white text-center rounded-top-4">
+                            <h5 class="mb-0 fw-semibold text-uppercase">{{ material.name }}</h5>
+                        </div>
+
+                        <!-- Body -->
+                        <div class="card-body text-center">
+
+                            <!-- Imagen -->
+                            <img [src]="material.imagePath" class="img-fluid rounded mb-3" alt="Imagen del producto"
+                                style="max-height: 180px; object-fit: contain;" (error)="onImageError($event)" />
+
+                            <!-- Datos del producto -->
+                            <ul class="list-unstyled text-start small mb-4">
+                                <li><strong>ID:</strong> {{ material.id }}</li>
+                                <li><strong>Existencia:</strong> {{ material.existence }}</li>
+                                <li><strong>ULTIMO INGRESO:</strong> {{ material.lastIncome }}</li>
+                            </ul>
+
+                            <!-- Controles -->
+                            <div class="row g-2">
+                                <!-- Quitar existencia -->
+                                <div class="col-6">
+                                    <input type="number" class="form-control mb-2"
+                                        [(ngModel)]="cantidadQuitar[material.id]" placeholder="Cantidad a quitar">
+                                    <button type="button" class="btn btn-outline-danger w-100"
+                                        (click)="MaterialquitarExistencia(material.id , material)">Quitar</button>
+                                </div>
+
+                                <!-- Agregar existencia -->
+                                <div class="col-6">
+                                    <input type="number" class="form-control mb-2"
+                                        [(ngModel)]="cantidadAgregar[material.id]" placeholder="Cantidad a agregar"
+                                        required>
+                                    <button type="button" class="btn btn-outline-success w-100"
+                                        (click)="MaterialagregarExistencia(material.id , material)">Agregar</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <!-- Toast de éxito -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+        <div #toastElement class="toast align-items-center text-white bg-success border-0" role="alert"
+            aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    {{ toastMessage }}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+    </div>

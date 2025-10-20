@@ -1,0 +1,36 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "guardar imagen en el servidor de laravel",
+  "steps": [
+    {
+      "file": "src/app/productos/productos.component.ts",
+      "description": "variable para guardar el path de la imagen , osea donde se va guardar (url)",
+      "line": 87
+    },
+    {
+      "file": "src/app/services/productos.service.ts",
+      "description": "crear un servicio donde mande a llamar a nuestra api que se va encargar de guardar el archivo en laravel",
+      "line": 27
+    },
+    {
+      "file": "src/app/productos/productos.component.ts",
+      "description": "creamos una funcion para cuando guarde un archivo la mande a llamar , llame a la api y se guarda el archivo en el servidor de laravel y en la variable obtiene el path en IMG_PATH",
+      "line": 89
+    },
+    {
+      "file": "src/app/productos/productos.component.ts",
+      "description": "se agrega esta funcion de que si hay una imagen seleciioanda entra al if y asigan el path a la variable",
+      "line": 116
+    },
+    {
+      "file": "src/app/productos/productos.component.ts",
+      "description": "y por ultimo reasigna otra vez vacia la imgPath para que no se quede con la imagen",
+      "line": 137
+    },
+    {
+      "file": "src/app/productos/productos.component.html",
+      "description": "aqui en este input mandamos a llamar a la funcion que creamos para que guarde el archivo en el servidor",
+      "line": 96
+    }
+  ]
+}

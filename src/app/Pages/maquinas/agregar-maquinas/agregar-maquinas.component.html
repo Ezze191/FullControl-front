@@ -1,0 +1,76 @@
+<!-- Botón para abrir el modal -->
+<div class="text-end mb-4">
+    <button type="button" class="btn btn-success btn-lg shadow-sm d-flex align-items-center gap-2"
+        data-bs-toggle="modal" data-bs-target="#modalAgregarProducto">
+        <i class="bi bi-plus-circle"></i>
+        Agregar Material
+    </button>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modalAgregarProducto" tabindex="-1" aria-labelledby="modalAgregarProductoLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0 rounded-4">
+            <form [formGroup]="materialForm" (ngSubmit)="saveMaterial()">
+                <div class="modal-header bg-primary text-white rounded-top-4">
+                    <h5 class="modal-title" id="modalAgregarProductoLabel">📝AGREGAR UN NUEVO MATERIAL</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">NOMBRE</label>
+                        <input type="text" class="form-control form-control-lg" placeholder="Ej: Impresora.."  formControlName="name" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">EXISTENCIA</label>
+                        <input type="number" class="form-control form-control-lg" placeholder="Ej: 2.." formControlName="existence" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">PRECIO</label>
+                        <input type="number" class="form-control form-control-lg" placeholder="EJ: 23" formControlName="price" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">PROVEDOR</label>
+                        <input type="text" class="form-control form-control-lg" placeholder="EJ: Amazon..."  formControlName="supplier" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">LINK DE COMPRA</label>
+                        <input type="text" class="form-control form-control-lg" placeholder="EJ: 43" formControlName="buyLink"  />
+                    </div>
+                    <div class="mb-3">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">FECHA DE INGRESO</label>
+                            <input type="date" class="form-control form-control-lg" formControlName="lastIncome" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">IMAGEN</label>
+                            <input type="file" class="form-control form-control-lg" (change)="selectFile($event)"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between px-4 pb-4">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary px-4" data-bs-dismiss="modal">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast de éxito -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+  <div #toastElement class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive"
+    aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        {{ toastMessage }}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+        aria-label="Close"></button>
+    </div>
+  </div>
+</div>

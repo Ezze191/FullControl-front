@@ -1,0 +1,166 @@
+<h2 class="text-center my-5 display-6 fw-semibold text-primary">📃 Ordenes</h2>
+
+
+
+<!-- Acciones superiores -->
+<div class="container mb-4">
+    <div class="row gy-3 align-items-center">
+        <!-- Botones PDF / Excel / Filtros -->
+        <div class="col-lg-8">
+            <div class="d-flex flex-wrap gap-2">
+                <button (click)="exportarPDF()" class="btn btn-outline-danger d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+                </button>
+                <button (click)="exportarExcel()"
+                    class="btn btn-outline-success d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-file-earmark-excel-fill"></i> Excel
+                </button>
+                <button (click)="getOnlyFinished()"
+                    class="btn btn-outline-success d-inline-flex align-items-center gap-1">
+                    <i class="bi"></i> Ordenes Terminadas
+                </button>
+                <button (click)="getOnlyNotFinished()"
+                    class="btn btn-outline-success d-inline-flex align-items-center gap-1">
+                    <i class="bi"></i> Ordenes No Terminadas
+                </button>
+                <button (click)="getAllOrders();"
+                    class="btn btn-outline-success d-inline-flex align-items-center gap-1">
+                    <i class="bi"></i> Todas Las Ordenes
+                </button>
+            </div>
+        </div>
+
+
+
+        <!-- Totales -->
+        <div class="col-lg-4 text-lg-end">
+            <p class="mb-1 fw-bold text-secondary">
+                TOTAL ORDENES: <span class="text-success">{{ totalOrders() }}</span>
+            </p>
+            <p class="mb-0 fw-bold text-secondary">
+                TOTAL DINERO DE ORDENES: <span class="text-success">{{ totalDineroDeOrdenes() }}</span>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros adicionales -->
+<div class="container mb-4">
+    <div class="row gy-3 align-items-end">
+        <!-- Buscador -->
+        <div class="col-md-4 ms-auto">
+            <input type="text" class="form-control form-control-sm" placeholder="🔍 Buscar por nombre"
+                [(ngModel)]="wordSearch">
+        </div>
+
+    </div>
+</div>
+
+<!-- Spinner -->
+<div class="text-center my-4" *ngIf="SpinnerLoading">
+    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+        <span class="visually-hidden">Cargando...</span>
+    </div>
+</div>
+
+<app-agregar-orden></app-agregar-orden>
+
+<!-- Cards -->
+<div class="container">
+    <div class="row">
+        <div class="col-lg-4 col-md-6 mb-4" *ngFor="let order of FilterOrders.slice().reverse()">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-header bg-primary text-white text-center">
+                    <h5 class="mb-0 fw-semibold text-uppercase"> {{order.customerName}} </h5>
+                </div>
+                <div class="card-body text-center">
+                    <ul class="list-unstyled text-start small mb-4">
+                        <li><strong>ID:</strong> {{order.id}} </li>
+                        <li>
+                            <strong>STATUS: </strong>
+                            <b [class.text-danger]="!order.finished" [class.text-success]="order.finished">
+                                {{ order.finished ? 'TERMINADA' : 'NO TERMINADA' }}
+                            </b>
+                        </li>
+                        <li><strong>FECHA DE ENTREGA:</strong> {{order.date | date: 'shortDate'}}</li>
+                        <li><strong>DESCRIPCION:</strong> {{order.description}}</li>
+                        <li><strong>NOMBRE DEL CLIENTE:</strong> {{order.customerName}}</li>
+                        <li *ngIf="order.phoneNumber != 0"><strong>NUMERO DE TELEFONO:</strong> {{order.phoneNumber}}
+                        </li>
+                        <li *ngIf="order.phoneNumber == 0"><strong>NUMERO DE TELEFONO:</strong> Sin numero</li>
+                        <li><strong>PRECIO:</strong> ${{order.price}}</li>
+                    </ul>
+
+                    <div class="d-grid gap-2">
+                        <button *ngIf="!order.finished" type="button" class="btn btn-sm btn-outline-success"
+                            (click)="FinishOrder(order.id)">✔️ Terminar</button>
+                        <button *ngIf="order.finished" type="button" class="btn btn-sm btn-outline-success"
+                            (click)="agregar_carrito(order.id , order.description ,order.price)">🛍️ Cobrar</button>
+                        <button *ngIf="order.finished" type="button" class="btn btn-sm btn-outline-danger"
+                            (click)="notFinishOrder(order.id)">⬅️ Dejar Pendiente</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                            (click)="modalEdit(order)" data-bs-target="#editmodal">✏️ Editar</button>
+                        <button (click)="deleteOrder(order.id)" class="btn btn-outline-danger">🗑️ Eliminar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast de éxito -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+    <div #toastElement class="toast align-items-center text-white bg-success border-0" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                {{ toastMessage }}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar -->
+<div class="modal fade" id="editmodal" tabindex="-1" aria-labelledby="formeditLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 shadow-lg">
+            <form [formGroup]="editOrder" (ngSubmit)="guardarEdit()">
+                <div class="modal-header bg-primary text-white rounded-top-4">
+                    <h5 class="modal-title" id="formeditLabel">✏️ EDITAR ORDEN</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">FECHA </label>
+                        <input type="date" class="form-control" required formControlName="date">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">DESCRIPCION</label>
+                        <input type="text" class="form-control" formControlName="description" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">NOMBRE DEL CLIENTE</label>
+                        <input type="text" class="form-control" formControlName="customerName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">NUMERO DE TELEFONO</label>
+                        <input type="number" class="form-control" formControlName="phoneNumber">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">PRECIO</label>
+                        <input type="number" class="form-control" formControlName="price" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary rounded-pill"
+                        data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary rounded-pill" data-bs-dismiss="modal">Guardar
+                        Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

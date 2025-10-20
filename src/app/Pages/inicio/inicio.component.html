@@ -1,0 +1,260 @@
+<!-- Toast de éxito -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+  <div #toastElement class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive"
+    aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        {{ toastMessage }}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+        aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<div>
+  <button class="btn btn-outline-success me-2 d-inline-flex align-items-center gap-1" (click)="mostrarcarrito()">
+    <i class="bi bi-bag-fill"></i>
+  </button>
+  <button (click)="selectProducts()" class="btn btn-outline-success me-2 d-inline-flex align-items-center gap-1">
+    PRODUCTOS
+  </button>
+  <button (click)="selectService()" class="btn btn-outline-success me-2 d-inline-flex align-items-center gap-1">
+    SERVICIOS
+  </button>
+</div>
+
+
+
+
+
+<!-- Sidebar Carrito -->
+<div *ngIf="mostrarCarrito" class="position-fixed top-0 end-0 bg-white shadow-lg p-4 d-flex flex-column vh-100"
+  style="width: 320px; max-width: 100%; overflow-y: auto;">
+
+  <i class="bi bi-x-circle-fill" style="cursor:pointer" (click)="mostrarcarrito()"></i>
+
+  <h5 class="fw-bold mb-4 border-bottom pb-2">LISTA DE PRODUCTOS</h5>
+
+  <div *ngFor="let item of Carrito" class="mb-3 pb-2 border-bottom">
+    <div class="fw-semibold">{{ item.nombre }}</div>
+
+    <div class="d-flex align-items-center gap-2 my-2">
+      <button class="btn btn-sm btn-outline-secondary" (click)="restarUnidad(item)" aria-label="Restar unidad">
+        <i class="bi bi-dash"></i>
+      </button>
+
+      <span class="fw-bold flex-grow-1 text-center">{{ item.unidades }}</span>
+
+      <button class="btn btn-sm btn-outline-secondary" (click)="sumarUnidad(item)" aria-label="Sumar unidad">
+        <i class="bi bi-plus"></i>
+      </button>
+    </div>
+
+    <div class="text-muted small">Precio: ${{ item.precio * item.unidades }}</div>
+  </div>
+
+  <div class="fw-bold fs-5 mt-auto pt-3 border-top">
+    Total: ${{ calcularTotal() }}
+  </div>
+
+  <button class="btn btn-success w-100 fw-bold py-2 mt-3" (click)="abrirModal()" aria-label="Cobrar">
+    <i class="bi bi-cash-coin me-2"></i> Cobrar
+  </button>
+</div>
+
+
+
+
+
+
+
+<!-- Modal Cobrar Mejorado -->
+<div class="modal fade" id="modalCobrar" tabindex="-1" aria-labelledby="modalCobrarLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow-lg border-0">
+      <div class="modal-header bg-primary text-white rounded-top-4">
+        <h5 class="modal-title" id="modalCobrarLabel">
+          <i class="bi bi-cash-stack me-2"></i> Cobrar
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModal()" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body py-4 px-4">
+        <p class="fs-5 mb-3">Total a pagar: <strong class="text-success">${{ calcularTotal() }}</strong></p>
+
+        <label for="dineroIngresado" class="form-label fw-semibold">Dinero ingresado:</label>
+        <input type="number" id="dineroIngresado" class="form-control form-control-lg text-center fs-5"
+          [(ngModel)]="dineroIngresado" min="{{calcularTotal()}}" placeholder="Ingrese el monto" />
+
+        <div *ngIf="dineroIngresado !== null && dineroIngresado >= calcularTotal()"
+          class="alert alert-success mt-4 text-center py-2 fs-5 rounded-3">
+          Cambio a dar: <strong>${{ dineroIngresado - calcularTotal() }}</strong>
+        </div>
+
+        <div *ngIf="dineroIngresado !== null && dineroIngresado < calcularTotal()"
+          class="alert alert-danger mt-4 text-center py-2 fs-6 rounded-3">
+          Dinero insuficiente
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between px-4 py-3">
+        <button type="button" class="btn btn-primary fw-bold px-4 py-2 fs-6" [disabled]="!puedeCobrar()"
+          (click)="confirmarCobrar()">
+          Confirmar
+        </button>
+        <button type="button" class="btn btn-outline-secondary fw-semibold px-4 py-2" (click)="cerrarModal()">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<h2 class="text-center my-5 fw-bold text-primary display-5">💵 COBRAR</h2>
+
+
+<div *ngIf="ProductosActive" class="container d-flex justify-content-center">
+  <div class="bg-dark rounded-4 p-5 text-center shadow-lg" style="max-width: 566px; width: 100%;">
+    <h2 class="text-white fw-bold mb-4">Buscar Producto</h2>
+    <form (submit)="findbyPLU()">
+      <div class="mb-4">
+        <input *ngIf="!findbyname" type="number" class="form-control text-center fw-bold py-3 fs-5"
+          placeholder="Código del Producto" [(ngModel)]="pluProducto" name="pluProducto" required>
+        <input *ngIf="findbyname" type="text" class="form-control text-center fw-bold py-3 fs-5"
+          placeholder="Nombre del Producto" [(ngModel)]="nombreProducto" name="pluProducto" required>
+        <div class="form-check text-start mt-3">
+          <input type="checkbox" class="form-check-input" id="buscarNombre" (change)="checkbox($event)">
+          <label class="form-check-label text-white fw-bold" for="buscarNombre">Buscar Por Nombre</label>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-lg fw-bold px-5 py-3">
+        <i class="bi bi-search me-2"></i> Buscar
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- buscar servicio -->
+<div *ngIf="ServiceActive" class="container d-flex justify-content-center">
+  <div class="bg-dark rounded-4 p-5 text-center shadow-lg" style="max-width: 566px; width: 100%;">
+    <h2 class="text-white fw-bold mb-4">Buscar Servicio</h2>
+    <form (submit)="Servicesearchbyname()">
+      <div class="mb-4">
+        <input type="text" class="form-control text-center fw-bold py-3 fs-5" placeholder="Nombre del Producto"
+          [(ngModel)]="nombreService" name="nombreService" required>
+        <div class="form-check text-start mt-3">
+        </div>
+      </div>
+      <button class="btn btn-primary btn-lg fw-bold px-5 py-3">
+        <i class="bi bi-search me-2"></i> Buscar
+      </button>
+    </form>
+  </div>
+</div>
+
+
+<div class="row justify-content-center mt-5" *ngIf="producto && !findbyname">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow-lg border-0 rounded-4">
+
+      <div class="card-header bg-primary text-white text-center rounded-top-4">
+        <h5 class="mb-0 fw-bold text-uppercase fs-4">{{ producto.NOMBRE }}</h5>
+      </div>
+
+      <div class="card-body text-center">
+
+        <img [src]="producto.IMAGE_PATH" class="img-fluid rounded mb-3 border" alt="Imagen del producto"
+          style="max-height: 200px; object-fit: contain;" (error)="onImageError($event)" />
+
+        <ul class="list-unstyled text-start fs-6 mb-4">
+          <li><strong>Precio:</strong> ${{ producto.PRECIO_VENTA }}</li>
+        </ul>
+
+        <div class="row g-2">
+          <div class="col-12">
+            <input type="number" class="form-control mb-3 text-center py-2" placeholder="Cantidad a agregar"
+              [(ngModel)]="UnidadesAcobrar[producto.ID_PRODUCT]" required>
+            <button type="button" class="btn btn-success w-100 fw-bold py-2"
+              (click)="agregar_carrito(producto.ID_PRODUCT, producto.NOMBRE, producto.PRECIO_VENTA)">
+              <i class="bi bi-cart-plus me-2"></i> Agregar
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-container *ngIf="findbyname || selectProducts">
+  <div class="row justify-content-center mt-5" *ngFor="let producto of productosporname">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow-lg border-0 rounded-4">
+
+        <div class="card-header bg-primary text-white text-center rounded-top-4">
+          <h5 class="mb-0 fw-bold text-uppercase fs-4">{{ producto.NOMBRE }}</h5>
+        </div>
+
+        <div class="card-body text-center">
+
+          <img [src]="producto.IMAGE_PATH" class="img-fluid rounded mb-3 border" alt="Imagen del producto"
+            style="max-height: 200px; object-fit: contain;" (error)="onImageError($event)" />
+
+          <ul class="list-unstyled text-start fs-6 mb-4">
+            <li><strong>Precio:</strong> ${{ producto.PRECIO_VENTA }}</li>
+          </ul>
+
+          <div class="row g-2">
+            <div class="col-12">
+              <input type="number" class="form-control mb-3 text-center py-2" placeholder="Cantidad a agregar"
+                [(ngModel)]="UnidadesAcobrar[producto.ID_PRODUCT]" required>
+              <button type="button" class="btn btn-success w-100 fw-bold py-2"
+                (click)="agregar_carrito(producto.ID_PRODUCT, producto.NOMBRE, producto.PRECIO_VENTA)">
+                <i class="bi bi-cart-plus me-2"></i> Agregar
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+<!-- card del servicio -->
+<ng-container *ngIf="selectService">
+  <div class="row justify-content-center mt-5" *ngFor="let service of services">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow-lg border-0 rounded-4">
+
+        <div class="card-header bg-primary text-white text-center rounded-top-4">
+          <h5 class="mb-0 fw-bold text-uppercase fs-4">{{ service.name }}</h5>
+        </div>
+
+        <div class="card-body text-center">
+
+          <img [src]="service.imagePath" class="img-fluid rounded mb-3 border" alt="Imagen del producto"
+            style="max-height: 200px; object-fit: contain;" (error)="onImageError($event)" />
+
+          <ul class="list-unstyled text-start fs-6 mb-4">
+            <li><strong>COMISION:</strong> ${{ service.commission }}</li>
+          </ul>
+
+          <div class="row g-2">
+            <div class="col-12">
+              <input type="number" class="form-control mb-3 text-center py-2" placeholder="total del servicio a agregar"
+                [(ngModel)]="serviceDineroAcobrar[service.id]" required>
+              <button type="button" class="btn btn-success w-100 fw-bold py-2"
+                (click)="Serviceagregar_carrito(service.id, service.name, service.commission)">
+                <i class="bi bi-cart-plus me-2"></i> Agregar
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
