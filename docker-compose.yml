@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  angular-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mi-app-angular
+    restart: always
+    ports:
+      - "4200:4200"
+    volumes:
+      # Volumen para desarrollo - sincroniza cambios en tiempo real
+      - ./src:/app/src
+      - ./angular.json:/app/angular.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.app.json:/app/tsconfig.app.json
+      # Excluir node_modules para evitar conflictos
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    network_mode: "bridge"
+    stdin_open: true
+    tty: true
