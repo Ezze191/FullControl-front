@@ -352,5 +352,308 @@ export class ProductosComponent {
     target.src = 'https://media.istockphoto.com/id/1180410208/vector/landscape-image-gallery-with-the-photos-stack-up.jpg?s=612x612&w=0&k=20&c=G21-jgMQruADLPDBk7Sf1vVvCEtPiJD3Rf39AeB95yI=';
   }
 
+  // Función helper para cargar imagen como base64
+  private cargarImagenComoBase64(url: string): Promise<string> {
+    return new Promise((resolve) => {
+      // Si la URL está vacía o no es válida, retornar vacío
+      if (!url || url.trim() === '') {
+        resolve('');
+        return;
+      }
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      // Timeout para evitar que se quede colgado
+      const timeout = setTimeout(() => {
+        resolve('');
+      }, 5000); // 5 segundos de timeout
+      
+      img.onload = () => {
+        clearTimeout(timeout);
+        try {
+          const canvas = document.createElement('canvas');
+          // Limitar el tamaño máximo de la imagen para optimizar
+          const maxWidth = 200;
+          const maxHeight = 200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height = (height * maxWidth) / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = (width * maxHeight) / height;
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const base64 = canvas.toDataURL('image/jpeg', 0.85);
+            resolve(base64);
+          } else {
+            resolve('');
+          }
+        } catch (error) {
+          // Si falla por CORS u otro error, retornar vacío
+          resolve('');
+        }
+      };
+      
+      img.onerror = () => {
+        clearTimeout(timeout);
+        // Si falla cargar la imagen, retornar vacío
+        resolve('');
+      };
+      
+      img.src = url;
+    });
+  }
+
+  // Exportar catálogo para clientes
+  async exportarCatalogo() {
+    this.SpinnerLoading = true;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    // Ordenar productos alfabéticamente por nombre
+    const productos = [...this.productosFiltrados].sort((a, b) => {
+      const nombreA = (a.NOMBRE || '').toLowerCase();
+      const nombreB = (b.NOMBRE || '').toLowerCase();
+      return nombreA.localeCompare(nombreB);
+    });
+    
+    if (productos.length === 0) {
+      this.SpinnerLoading = false;
+      alert('No hay productos para exportar');
+      return;
+    }
+
+    // Configuración del layout
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 10;
+    const cardWidth = (pageWidth - margin * 3) / 2; // 2 columnas
+    const cardHeight = 70;
+    const imgHeight = 40;
+    const imgWidth = 50;
+    const espacioEntreCards = 5;
+    
+    let x = margin;
+    let y = margin + 20; // Espacio para el título
+    let primeraPagina = true;
+    let letraActualPagina = ''; // Letra que se dibujó en la página actual
+    let numeroPagina = 1;
+
+    // Función helper para dibujar la letra inicial en la esquina superior derecha
+    const dibujarLetraInicial = (letra: string, esPrimeraPagina: boolean) => {
+      // Obtener la primera letra del nombre en mayúscula
+      const primeraLetra = letra.toUpperCase();
+      
+      // Ajustar la posición Y según si es la primera página o no
+      const posY = esPrimeraPagina ? 20 : 6;
+      const posX = pageWidth - 10;
+      const tamanoBadge = 12;
+      
+      // Dibujar badge redondeado de fondo para la letra (más elegante y compatible)
+      doc.setFillColor(248, 249, 250); // Fondo gris muy claro
+      doc.setDrawColor(206, 212, 218); // Borde gris
+      doc.setLineWidth(0.2);
+      doc.roundedRect(posX - tamanoBadge, posY - tamanoBadge / 2, tamanoBadge, tamanoBadge, 2, 2, 'FD');
+      
+      // Dibujar letra más pequeña y elegante
+      doc.setTextColor(73, 80, 87); // Color gris oscuro
+      doc.setFontSize(24);
+      doc.setFont('helvetica', 'bold');
+      doc.text(primeraLetra, posX - tamanoBadge / 2, posY, {
+        align: 'center',
+        baseline: 'middle'
+      });
+    };
+
+    // Título del catálogo con diseño moderno (solo en la primera página)
+    doc.setFillColor(13, 110, 253); // Color primary de Bootstrap
+    doc.rect(0, 0, pageWidth, 18, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    const tituloTexto = 'CATÁLOGO DE PRODUCTOS';
+    const tituloWidth = doc.getTextWidth(tituloTexto);
+    doc.text(tituloTexto, (pageWidth - tituloWidth) / 2, 12);
+    
+    // Fecha
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    const fecha = new Date().toLocaleDateString('es-MX', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    const fechaWidth = doc.getTextWidth(fecha);
+    doc.text(fecha, (pageWidth - fechaWidth) / 2, 17);
+
+    // Procesar productos
+    for (let i = 0; i < productos.length; i++) {
+      const producto = productos[i];
+      
+      // Obtener la primera letra del nombre del producto
+      const primeraLetraProducto = (producto.NOMBRE || '').charAt(0).toUpperCase() || '#';
+      // Si la letra no es válida (número, símbolo), usar '#'
+      const letraValida = /[A-ZÁÉÍÓÚÑ]/.test(primeraLetraProducto) ? primeraLetraProducto : '#';
+      
+      // Verificar si necesitamos una nueva página ANTES de dibujar el producto
+      // Verificar tanto si estamos en la primera columna como en la segunda
+      const espacioDisponible = pageHeight - margin - y;
+      const necesitaNuevaPagina = espacioDisponible < cardHeight;
+      
+      if (necesitaNuevaPagina) {
+        doc.addPage();
+        numeroPagina++;
+        y = margin;
+        x = margin;
+        primeraPagina = false;
+        letraActualPagina = ''; // Resetear para nueva página - esto forzará dibujar la letra
+      }
+
+      // Dibujar la letra inicial SOLO si es el primer producto de la página o cambió la letra
+      if (letraValida !== letraActualPagina) {
+        letraActualPagina = letraValida;
+        dibujarLetraInicial(letraValida, primeraPagina);
+      }
+
+      // Dibujar card con estilo Bootstrap
+      const cardX = x;
+      const cardY = y;
+
+      // Sombra de la card (efecto visual)
+      doc.setDrawColor(200, 200, 200);
+      doc.setFillColor(250, 250, 250);
+      doc.roundedRect(cardX + 0.5, cardY + 0.5, cardWidth - 1, cardHeight - 1, 2, 2, 'F');
+      
+      // Borde de la card
+      doc.setDrawColor(220, 220, 220);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(cardX, cardY, cardWidth, cardHeight, 2, 2, 'S');
+
+      // Header de la card (color primary)
+      doc.setFillColor(13, 110, 253);
+      doc.roundedRect(cardX, cardY, cardWidth, 12, 2, 2, 'F');
+      
+      // Nombre del producto en el header (mejor manejo de texto largo)
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      const nombre = (producto.NOMBRE || 'Sin nombre').toUpperCase();
+      
+      // Usar splitTextToSize de jsPDF para dividir automáticamente el texto
+      const maxWidthNombre = cardWidth - 6;
+      const lineasNombre = doc.splitTextToSize(nombre, maxWidthNombre);
+      
+      if (lineasNombre.length === 1) {
+        // Una sola línea - centrar verticalmente
+        doc.text(lineasNombre[0], cardX + cardWidth / 2, cardY + 8, {
+          align: 'center'
+        });
+      } else if (lineasNombre.length === 2) {
+        // Dos líneas
+        doc.text(lineasNombre[0], cardX + cardWidth / 2, cardY + 6.5, {
+          align: 'center'
+        });
+        doc.text(lineasNombre[1], cardX + cardWidth / 2, cardY + 9.5, {
+          align: 'center'
+        });
+      } else {
+        // Más de dos líneas - mostrar primeras dos y truncar
+        doc.text(lineasNombre[0], cardX + cardWidth / 2, cardY + 6.5, {
+          align: 'center'
+        });
+        const segundaLinea = lineasNombre[1].length > 18 
+          ? lineasNombre[1].substring(0, 15) + '...' 
+          : lineasNombre[1];
+        doc.text(segundaLinea, cardX + cardWidth / 2, cardY + 9.5, {
+          align: 'center'
+        });
+      }
+
+      // Cuerpo de la card
+      const bodyY = cardY + 12;
+      
+      // Cargar y dibujar imagen
+      try {
+        const imagenBase64 = await this.cargarImagenComoBase64(producto.IMAGE_PATH);
+        if (imagenBase64) {
+          doc.addImage(imagenBase64, 'JPEG', 
+            cardX + (cardWidth - imgWidth) / 2, 
+            bodyY + 2, 
+            imgWidth, 
+            imgHeight, 
+            undefined, 
+            'FAST'
+          );
+        } else {
+          // Placeholder si no se puede cargar la imagen
+          doc.setFillColor(240, 240, 240);
+          doc.rect(cardX + (cardWidth - imgWidth) / 2, bodyY + 2, imgWidth, imgHeight, 'F');
+          doc.setTextColor(150, 150, 150);
+          doc.setFontSize(8);
+          doc.text('Sin imagen', cardX + cardWidth / 2, bodyY + imgHeight / 2 + 2, { align: 'center' });
+        }
+      } catch (error) {
+        // Placeholder en caso de error
+        doc.setFillColor(240, 240, 240);
+        doc.rect(cardX + (cardWidth - imgWidth) / 2, bodyY + 2, imgWidth, imgHeight, 'F');
+        doc.setTextColor(150, 150, 150);
+        doc.setFontSize(8);
+        doc.text('Sin imagen', cardX + cardWidth / 2, bodyY + imgHeight / 2 + 2, { align: 'center' });
+      }
+
+      // Precio de venta con fondo destacado (mejorado)
+      const precioY = bodyY + imgHeight + 6;
+      const precioTexto = `$${producto.PRECIO_VENTA.toFixed(2)}`;
+      
+      // Calcular dimensiones del badge de precio
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      const precioWidth = doc.getTextWidth(precioTexto) + 6;
+      const precioHeight = 5.5;
+      const precioX = cardX + (cardWidth - precioWidth) / 2;
+      
+      // Fondo para el precio (badge style mejorado)
+      doc.setFillColor(40, 167, 69); // Color success de Bootstrap
+      doc.setDrawColor(34, 139, 58); // Borde más oscuro
+      doc.setLineWidth(0.2);
+      doc.roundedRect(precioX, precioY - precioHeight / 2, precioWidth, precioHeight, 1, 1, 'FD');
+      
+      // Texto del precio
+      doc.setTextColor(255, 255, 255);
+      doc.text(precioTexto, cardX + cardWidth / 2, precioY, { 
+        align: 'center',
+        baseline: 'middle'
+      });
+
+      // Actualizar posición para el siguiente producto
+      if (x === margin) {
+        // Primera columna, mover a la segunda
+        x = margin + cardWidth + espacioEntreCards;
+      } else {
+        // Segunda columna, nueva fila - mover a la siguiente fila
+        x = margin;
+        y += cardHeight + espacioEntreCards;
+      }
+    }
+
+    // Guardar el PDF
+    const now = new Date();
+    const fileName = `catalogo-productos-${now.toISOString().slice(0, 10)}.pdf`;
+    doc.save(fileName);
+    this.SpinnerLoading = false;
+  }
+
 
 }
