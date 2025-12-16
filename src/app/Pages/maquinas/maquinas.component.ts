@@ -304,4 +304,210 @@ export class MaquinasComponent {
 
 
 
+
+
+
+  // Función helper para cargar imagen como base64
+  private cargarImagenComoBase64(url: string): Promise<string> {
+    return new Promise((resolve) => {
+      if (!url || url.trim() === '') {
+        resolve('');
+        return;
+      }
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      const timeout = setTimeout(() => { resolve(''); }, 5000);
+
+      img.onload = () => {
+        clearTimeout(timeout);
+        try {
+          const canvas = document.createElement('canvas');
+          const maxWidth = 200;
+          const maxHeight = 200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height = (height * maxWidth) / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = (width * maxHeight) / height;
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const base64 = canvas.toDataURL('image/jpeg', 0.85);
+            resolve(base64);
+          } else {
+            resolve('');
+          }
+        } catch (error) {
+          resolve('');
+        }
+      };
+
+      img.onerror = () => {
+        clearTimeout(timeout);
+        resolve('');
+      };
+
+      img.src = url;
+    });
+  }
+
+  async exportarCatalogo() {
+    this.SpinnerLoading = true;
+    const doc = new jsPDF('p', 'mm', 'a4');
+
+    const materiales = [...this.FilterMaterials].sort((a, b) => {
+      const nombreA = (a.name || '').toLowerCase();
+      const nombreB = (b.name || '').toLowerCase();
+      return nombreA.localeCompare(nombreB);
+    });
+
+    if (materiales.length === 0) {
+      this.SpinnerLoading = false;
+      alert('No hay materiales para exportar');
+      return;
+    }
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 10;
+    const cardWidth = (pageWidth - margin * 3) / 2;
+    const cardHeight = 70;
+    const imgHeight = 40;
+    const imgWidth = 50;
+    const espacioEntreCards = 5;
+
+    let x = margin;
+    let y = margin + 20;
+    let primeraPagina = true;
+    let letraActualPagina = '';
+    let numeroPagina = 1;
+
+    const dibujarLetraInicial = (letra: string, esPrimeraPagina: boolean) => {
+      const primeraLetra = letra.toUpperCase();
+      const posY = esPrimeraPagina ? 20 : 6;
+      const posX = pageWidth - 10;
+      const tamanoBadge = 12;
+
+      doc.setFillColor(248, 249, 250);
+      doc.setDrawColor(206, 212, 218);
+      doc.setLineWidth(0.2);
+      doc.roundedRect(posX - tamanoBadge, posY - tamanoBadge / 2, tamanoBadge, tamanoBadge, 2, 2, 'FD');
+
+      doc.setTextColor(73, 80, 87);
+      doc.setFontSize(24);
+      doc.setFont('helvetica', 'bold');
+      doc.text(primeraLetra, posX - tamanoBadge / 2, posY, { align: 'center', baseline: 'middle' });
+    };
+
+    doc.setFillColor(13, 110, 253);
+    doc.rect(0, 0, pageWidth, 18, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    const tituloTexto = 'CATÁLOGO DE MATERIALES';
+    const tituloWidth = doc.getTextWidth(tituloTexto);
+    doc.text(tituloTexto, (pageWidth - tituloWidth) / 2, 12);
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    const fecha = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+    const fechaWidth = doc.getTextWidth(fecha);
+    doc.text(fecha, (pageWidth - fechaWidth) / 2, 17);
+
+    for (let i = 0; i < materiales.length; i++) {
+      const material = materiales[i];
+      const primeraLetra = (material.name || '').charAt(0).toUpperCase() || '#';
+      const letraValida = /[A-ZÁÉÍÓÚÑ]/.test(primeraLetra) ? primeraLetra : '#';
+
+      if ((pageHeight - margin - y) < cardHeight) {
+        doc.addPage();
+        numeroPagina++;
+        y = margin;
+        x = margin;
+        primeraPagina = false;
+        letraActualPagina = '';
+      }
+
+      if (letraValida !== letraActualPagina) {
+        letraActualPagina = letraValida;
+        dibujarLetraInicial(letraValida, primeraPagina);
+      }
+
+      const cardX = x;
+      const cardY = y;
+
+      doc.setDrawColor(200, 200, 200);
+      doc.setFillColor(250, 250, 250);
+      doc.roundedRect(cardX + 0.5, cardY + 0.5, cardWidth - 1, cardHeight - 1, 2, 2, 'F');
+
+      doc.setDrawColor(220, 220, 220);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(cardX, cardY, cardWidth, cardHeight, 2, 2, 'S');
+
+      doc.setFillColor(13, 110, 253);
+      doc.roundedRect(cardX, cardY, cardWidth, 12, 2, 2, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      const nombre = (material.name || 'Sin nombre').toUpperCase();
+
+      const lines = doc.splitTextToSize(nombre, cardWidth - 6);
+      if (lines.length === 1) doc.text(lines[0], cardX + cardWidth / 2, cardY + 8, { align: 'center' });
+      else {
+        doc.text(lines[0], cardX + cardWidth / 2, cardY + 6.5, { align: 'center' });
+        doc.text(lines[1].length > 20 ? lines[1].substring(0, 18) + '...' : lines[1], cardX + cardWidth / 2, cardY + 9.5, { align: 'center' });
+      }
+
+      const bodyY = cardY + 12;
+      const imgBase64 = await this.cargarImagenComoBase64(material.imagePath);
+
+      if (imgBase64) {
+        doc.addImage(imgBase64, 'JPEG', cardX + (cardWidth - imgWidth) / 2, bodyY + 2, imgWidth, imgHeight, undefined, 'FAST');
+      } else {
+        doc.setFillColor(230, 230, 230);
+        doc.rect(cardX + (cardWidth - imgWidth) / 2, bodyY + 2, imgWidth, imgHeight, 'F');
+        doc.setTextColor(150, 150, 150);
+        doc.text('Sin imagen', cardX + cardWidth / 2, bodyY + imgHeight / 2 + 2, { align: 'center' });
+      }
+
+      const precioY = bodyY + imgHeight + 6;
+      const precioTxt = `$${material.price.toFixed(2)}`;
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      const pWidth = doc.getTextWidth(precioTxt) + 6;
+      const pX = cardX + (cardWidth - pWidth) / 2;
+
+      doc.setFillColor(40, 167, 69);
+      doc.setDrawColor(34, 139, 58);
+      doc.roundedRect(pX, precioY - 2.75, pWidth, 5.5, 1, 1, 'FD');
+
+      doc.setTextColor(255, 255, 255);
+      doc.text(precioTxt, cardX + cardWidth / 2, precioY, { align: 'center', baseline: 'middle' });
+
+      if (x === margin) x = margin + cardWidth + espacioEntreCards;
+      else {
+        x = margin;
+        y += cardHeight + espacioEntreCards;
+      }
+    }
+
+    doc.save(`catalogo-materiales-${new Date().toISOString().slice(0, 10)}.pdf`);
+    this.SpinnerLoading = false;
+  }
 }

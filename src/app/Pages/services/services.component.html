@@ -1,14 +1,18 @@
-<h2 class="text-center my-5 display-6 fw-semibold text-primary">💹 Servicios</h2>
+<h2 class="text-center my-5 display-6 fw-semibold text-primary">💹 SERVICIOS</h2>
 
 <app-agregar-servicio></app-agregar-servicio>
-<!-- Botones PDF, Excel y Totales Mejor Acomodados -->
+
+<!-- Botones PDF, Excel, Catálogo y Totales Mejor Acomodados -->
 <div class="d-flex justify-content-between align-items-center flex-wrap mb-4 gap-3">
     <div class="text-end">
-        <button (click)="exportarPDF()" class="btn btn-outline-danger me-2 d-inline-flex align-items-center gap-1">
+        <button class="btn btn-outline-danger me-2 d-inline-flex align-items-center gap-1" (click)="exportarPDF()">
             <i class="bi bi-file-earmark-pdf-fill"></i> PDF
         </button>
-        <button (click)="exportarExcel()" class="btn btn-outline-success d-inline-flex align-items-center gap-1">
+        <button class="btn btn-outline-success me-2 d-inline-flex align-items-center gap-1" (click)="exportarExcel()">
             <i class="bi bi-file-earmark-excel-fill"></i> Excel
+        </button>
+        <button class="btn btn-outline-info d-inline-flex align-items-center gap-1" (click)="exportarCatalogo()">
+            <i class="bi bi-images"></i> Catálogo
         </button>
     </div>
 
@@ -22,128 +26,126 @@
             <span class="text-success">{{ totalDineroDeServicio() }}</span>
         </p>
     </div>
+</div>
 
+<!-- Toolbar de Filtros Avanzados -->
+<div class="card shadow-sm mb-4 border-0 bg-light">
+    <div class="card-body">
+        <h6 class="card-subtitle mb-3 text-muted fw-bold">🔍 Filtros Avanzados</h6>
+        <div class="row g-3">
 
-    <!-- Buscador -->
-    <!-- Toolbar de Filtros Avanzados -->
-    <div class="card shadow-sm mb-4 border-0 bg-light">
-        <div class="card-body">
-            <h6 class="card-subtitle mb-3 text-muted fw-bold">🔍 Filtros Avanzados</h6>
-            <div class="row g-3">
-
-                <!-- Buscador -->
-                <div class="col-12 col-md-6">
-                    <label class="form-label small text-muted mb-1">Buscar (Nombre/Descripción)</label>
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                        <input type="text" class="form-control" placeholder="Escribe para buscar..."
-                            [(ngModel)]="wordSearch">
-                    </div>
+            <!-- Buscador -->
+            <div class="col-12 col-md-6">
+                <label class="form-label small text-muted mb-1">Buscar (Nombre/Descripción)</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" placeholder="Escribe para buscar..."
+                        [(ngModel)]="wordSearch">
                 </div>
-
-                <!-- Rango de Comisión -->
-                <div class="col-12 col-md-6">
-                    <label class="form-label small text-muted mb-1">Rango de Comisión ($)</label>
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text">$</span>
-                        <input type="number" class="form-control" placeholder="Min" [(ngModel)]="minComision">
-                        <span class="input-group-text">-</span>
-                        <input type="number" class="form-control" placeholder="Max" [(ngModel)]="maxComision">
-                    </div>
-                </div>
-
             </div>
+
+            <!-- Rango de Comisión -->
+            <div class="col-12 col-md-6">
+                <label class="form-label small text-muted mb-1">Rango de Comisión ($)</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">$</span>
+                    <input type="number" class="form-control" placeholder="Min" [(ngModel)]="minComision">
+                    <span class="input-group-text">-</span>
+                    <input type="number" class="form-control" placeholder="Max" [(ngModel)]="maxComision">
+                </div>
+            </div>
+
         </div>
     </div>
-    <!-- Spinner -->
-    <div class="text-center" *ngIf="SpinnerLoading">
-        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-            <span class="visually-hidden">Cargando...</span>
-        </div>
+</div>
+
+<!-- Spinner -->
+<div class="text-center" *ngIf="SpinnerLoading">
+    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+        <span class="visually-hidden">Cargando...</span>
     </div>
+</div>
 
+<!-- Cards -->
+<div class="container">
+    <div class="row">
+        <div class="col-lg-4 col-md-6 mb-4" *ngFor="let service of FilterServices">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-header bg-primary text-white text-center">
+                    <h5 class="mb-0 fw-semibold text-uppercase"> {{service.name}} </h5>
+                </div>
 
-    <!-- Cards -->
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-4 col-md-6 mb-4" *ngFor="let service of FilterServices">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-header bg-primary text-white text-center">
-                        <h5 class="mb-0 fw-semibold text-uppercase"> {{service.name}} </h5>
-                    </div>
-                    <div class="card-body text-center">
-                        <img [src]="service.imagePath" class="img-fluid rounded mb-3" alt="Imagen del producto"
-                            style="max-height: 150px; object-fit: contain;" (error)="onImageError($event)" />
+                <div class="card-body text-center">
+                    <img [src]="service.imagePath" class="img-fluid rounded mb-3" alt="Imagen del servicio"
+                        style="max-height: 150px; object-fit: contain;" (error)="onImageError($event)" />
 
-                        <ul class="list-unstyled text-start small mb-4">
-                            <li><strong>ID:</strong> {{service.id}} </li>
-                            <li><strong>DESCRIPCION:</strong> {{service.description}} </li>
-                            <li><strong>COMISION:</strong> ${{service.commission}}</li>
-                        </ul>
+                    <ul class="list-unstyled text-start small mb-4">
+                        <li><strong>ID:</strong> {{service.id}} </li>
+                        <li><strong>Descripción:</strong> {{service.description}} </li>
+                        <li><strong>Comisión:</strong> ${{service.commission}}</li>
+                    </ul>
 
-                        <div class="d-grid gap-2">
-                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                                (click)="modalEdit(service)" data-bs-target="#editmodal">
-                                ✏️ Editar
-                            </button>
-                            <button (click)="deleteService(service.id)" class="btn btn-outline-danger">🗑️
-                                Eliminar</button>
-                        </div>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                            (click)="modalEdit(service)" data-bs-target="#editmodal">
+                            ✏️ Editar
+                        </button>
+                        <button (click)="deleteService(service.id)" class="btn btn-outline-danger">🗑️ Eliminar</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Modal para editar -->
-    <div class="modal fade" id="editmodal" tabindex="-1" aria-labelledby="formeditLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content rounded-4 shadow-lg">
-                <form [formGroup]="editService" (ngSubmit)="guardarEdit()">
-                    <div class="modal-header bg-primary text-white rounded-top-4">
-                        <h5 class="modal-title" id="formeditLabel">✏️ EDITAR SERVICIO</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                            aria-label="Cerrar"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">NOMBRE</label>
-                            <input type="text" class="form-control" required formControlName="name">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">DESCRIPCION</label>
-                            <input type="text" class="form-control" formControlName="description" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">COMISION</label>
-                            <input type="number" class="form-control" formControlName="commission" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">IMAGEN</label>
-                            <input type="file" class="form-control" (change)="seleccionarArchivo($event)" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary rounded-pill"
-                            data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary rounded-pill" data-bs-dismiss="modal">Guardar
-                            Cambios</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast de éxito -->
-    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
-        <div #toastElement class="toast align-items-center text-white bg-success border-0" role="alert"
-            aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    {{ toastMessage }}
+</div>
+<!-- Modal para editar -->
+<div class="modal fade" id="editmodal" tabindex="-1" aria-labelledby="formeditLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 shadow-lg">
+            <form [formGroup]="editService" (ngSubmit)="guardarEdit()">
+                <div class="modal-header bg-primary text-white rounded-top-4">
+                    <h5 class="modal-title" id="formeditLabel">✏️ EDITAR SERVICIO</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                    aria-label="Close"></button>
-            </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">NOMBRE</label>
+                        <input type="text" class="form-control" required formControlName="name">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">DESCRIPCION</label>
+                        <input type="text" class="form-control" formControlName="description" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">COMISION</label>
+                        <input type="number" class="form-control" formControlName="commission" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">IMAGEN</label>
+                        <input type="file" class="form-control" (change)="seleccionarArchivo($event)" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary rounded-pill"
+                        data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary rounded-pill" data-bs-dismiss="modal">Guardar
+                        Cambios</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
+
+<!-- Toast de éxito -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+    <div #toastElement class="toast align-items-center text-white bg-success border-0" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                {{ toastMessage }}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                aria-label="Close"></button>
+        </div>
+    </div>
+</div>

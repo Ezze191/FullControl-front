@@ -1,60 +1,43 @@
-<h2 class="text-center my-5 display-6 fw-semibold text-primary">📃 Ordenes</h2>
+<h2 class="text-center my-5 display-6 fw-semibold text-primary">📃 ORDENES</h2>
 
+<!-- Acciones superiores y Totales -->
+<div class="d-flex justify-content-between align-items-center flex-wrap mb-4 gap-3 border-bottom pb-4">
+    <!-- Botones de Acción -->
+    <div class="d-flex flex-wrap gap-2">
+        <button (click)="exportarPDF()" class="btn btn-outline-danger d-inline-flex align-items-center gap-1">
+            <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+        </button>
+        <button (click)="exportarExcel()" class="btn btn-outline-success d-inline-flex align-items-center gap-1">
+            <i class="bi bi-file-earmark-excel-fill"></i> Excel
+        </button>
 
+        <div class="vr mx-1 d-none d-md-block"></div> <!-- Separador vertical -->
 
-<!-- Acciones superiores -->
-<div class="container mb-4">
-    <div class="row gy-3 align-items-center">
-        <!-- Botones PDF / Excel / Filtros -->
-        <div class="col-lg-8">
-            <div class="d-flex flex-wrap gap-2">
-                <button (click)="exportarPDF()" class="btn btn-outline-danger d-inline-flex align-items-center gap-1">
-                    <i class="bi bi-file-earmark-pdf-fill"></i> PDF
-                </button>
-                <button (click)="exportarExcel()"
-                    class="btn btn-outline-success d-inline-flex align-items-center gap-1">
-                    <i class="bi bi-file-earmark-excel-fill"></i> Excel
-                </button>
-                <button (click)="getOnlyFinished()"
-                    class="btn btn-outline-success d-inline-flex align-items-center gap-1">
-                    <i class="bi"></i> Ordenes Terminadas
-                </button>
-                <button (click)="getOnlyNotFinished()"
-                    class="btn btn-outline-success d-inline-flex align-items-center gap-1">
-                    <i class="bi"></i> Ordenes No Terminadas
-                </button>
-                <button (click)="getAllOrders();"
-                    class="btn btn-outline-success d-inline-flex align-items-center gap-1">
-                    <i class="bi"></i> Todas Las Ordenes
-                </button>
-            </div>
-        </div>
+        <button (click)="getOnlyFinished()"
+            class="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-1">
+            <i class="bi bi-check-circle"></i> Terminadas
+        </button>
+        <button (click)="getOnlyNotFinished()"
+            class="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-1">
+            <i class="bi bi-hourglass-split"></i> Pendientes
+        </button>
+        <button (click)="getAllOrders()" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1">
+            <i class="bi bi-list-ul"></i> Todas
+        </button>
+    </div>
 
-
-
-        <!-- Totales -->
-        <div class="col-lg-4 text-lg-end">
-            <p class="mb-1 fw-bold text-secondary">
-                TOTAL ORDENES: <span class="text-success">{{ totalOrders() }}</span>
-            </p>
-            <p class="mb-0 fw-bold text-secondary">
-                TOTAL DINERO DE ORDENES: <span class="text-success">{{ totalDineroDeOrdenes() }}</span>
-            </p>
-        </div>
+    <!-- Totales -->
+    <div class="text-end ms-auto">
+        <p class="mb-1 fw-bold text-secondary text-nowrap">
+            TOTAL ORDENES: <span class="text-success">{{ totalOrders() }}</span>
+        </p>
+        <p class="mb-0 fw-bold text-secondary text-nowrap">
+            DINERO TOTAL: <span class="text-success">{{ totalDineroDeOrdenes() }}</span>
+        </p>
     </div>
 </div>
 
-<!-- Filtros adicionales -->
-<div class="container mb-4">
-    <div class="row gy-3 align-items-end">
-        <!-- Buscador -->
-        <div class="col-md-4 ms-auto">
-            <input type="text" class="form-control form-control-sm" placeholder="🔍 Buscar por nombre"
-                [(ngModel)]="wordSearch">
-        </div>
-
-    </div>
-</div>
+<app-agregar-orden></app-agregar-orden>
 
 <!-- Spinner -->
 <div class="text-center my-4" *ngIf="SpinnerLoading">
@@ -62,8 +45,6 @@
         <span class="visually-hidden">Cargando...</span>
     </div>
 </div>
-
-<app-agregar-orden></app-agregar-orden>
 
 <!-- Toolbar de Filtros Avanzados -->
 <div class="container mb-4">
