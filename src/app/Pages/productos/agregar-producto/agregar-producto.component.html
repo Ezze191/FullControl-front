@@ -21,23 +21,33 @@
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label fw-semibold">PLU</label>
-                        <input type="number" class="form-control form-control-lg" placeholder="Ej: 123123.."  formControlName="PLU" required />
+                        <div class="input-group">
+                            <input type="number" class="form-control form-control-lg" placeholder="Ej: 123123.."
+                                formControlName="PLU" required />
+                            <button class="btn btn-outline-secondary" type="button" (click)="generarPLUAleatorio()">
+                                <i class="bi bi-shuffle"></i> Aleatorio
+                            </button>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">NOMBRE</label>
-                        <input type="text" class="form-control form-control-lg" placeholder="Ej: Lapiz.." formControlName="NOMBRE" required />
+                        <input type="text" class="form-control form-control-lg" placeholder="Ej: Lapiz.."
+                            formControlName="NOMBRE" required />
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">EXISTENCIA</label>
-                        <input type="number" class="form-control form-control-lg" placeholder="EJ: 23" formControlName="EXISTENCIA" required />
+                        <input type="number" class="form-control form-control-lg" placeholder="EJ: 23"
+                            formControlName="EXISTENCIA" required />
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">PRECIO COMPRA</label>
-                        <input type="number" class="form-control form-control-lg" placeholder="EJ: 1231..."  formControlName="PRECIO_COMPRA" required />
+                        <input type="number" class="form-control form-control-lg" placeholder="EJ: 1231..."
+                            formControlName="PRECIO_COMPRA" required />
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">PRECIO VENTA</label>
-                        <input type="number" class="form-control form-control-lg" placeholder="EJ: 43" formControlName="PRECIO_VENTA" required />
+                        <input type="number" class="form-control form-control-lg" placeholder="EJ: 43"
+                            formControlName="PRECIO_VENTA" required />
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">PROVEDOR</label>
@@ -45,11 +55,12 @@
                             formControlName="PROVEDOR" required />
                         <div class="mb-3">
                             <label class="form-label fw-semibold">FECHA DE INGRESO</label>
-                            <input type="date" class="form-control form-control-lg" formControlName="ULTIMO_INGRESO" required />
+                            <input type="date" class="form-control form-control-lg" formControlName="ULTIMO_INGRESO"
+                                required />
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">IMAGEN</label>
-                            <input type="file" class="form-control form-control-lg" (change)="selectFile($event)"/>
+                            <input type="file" class="form-control form-control-lg" (change)="selectFile($event)" />
                         </div>
                     </div>
                 </div>
@@ -66,14 +77,14 @@
 
 <!-- Toast de éxito -->
 <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
-  <div #toastElement class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive"
-    aria-atomic="true">
-    <div class="d-flex">
-      <div class="toast-body">
-        {{ toastMessage }}
-      </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-        aria-label="Close"></button>
+    <div #toastElement class="toast align-items-center text-white bg-success border-0" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                {{ toastMessage }}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                aria-label="Close"></button>
+        </div>
     </div>
-  </div>
 </div>
