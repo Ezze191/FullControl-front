@@ -3,17 +3,51 @@
 <div class="card p-4 shadow-lg border-0 rounded-4 bg-white">
   <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
     <!-- Filtros de fecha -->
-    <div class="d-flex flex-wrap gap-3">
-      <div>
-        <label for="fechaInicio" class="form-label mb-1 fw-semibold text-secondary">📅 Desde:</label>
-        <input id="fechaInicio" type="date" class="form-control rounded-3 shadow-sm" [(ngModel)]="fechaInicio"
-          (change)="filtrarPorFecha()" />
+    <!-- Filtros Avanzados -->
+    <!-- Toolbar -->
+    <div class="row g-3 flex-grow-1">
+
+      <!-- 1. Búsqueda -->
+      <div class="col-12 col-md-4">
+        <label class="form-label mb-1 fw-semibold text-secondary small">🔍 Buscar (Nombre/ID)</label>
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control rounded-3" placeholder="Nombre..." [(ngModel)]="terminoBusqueda"
+            (keyup)="filtrarPorFecha()">
+        </div>
       </div>
-      <div>
-        <label for="fechaFin" class="form-label mb-1 fw-semibold text-secondary">📅 Hasta:</label>
-        <input id="fechaFin" type="date" class="form-control rounded-3 shadow-sm" [(ngModel)]="fechaFin"
-          (change)="filtrarPorFecha()" />
+
+      <!-- 2. Rango Fechas -->
+      <div class="col-12 col-md-4">
+        <label class="form-label mb-1 fw-semibold text-secondary small">📅 Rango de Fechas</label>
+        <div class="input-group input-group-sm">
+          <input type="date" class="form-control rounded-3" [(ngModel)]="fechaInicio" (change)="filtrarPorFecha()">
+          <span class="input-group-text">-</span>
+          <input type="date" class="form-control rounded-3" [(ngModel)]="fechaFin" (change)="filtrarPorFecha()">
+        </div>
       </div>
+
+      <!-- 3. Rango Unidades -->
+      <div class="col-12 col-md-2">
+        <label class="form-label mb-1 fw-semibold text-secondary small">📦 Unidades</label>
+        <div class="input-group input-group-sm">
+          <input type="number" class="form-control" placeholder="Min" [(ngModel)]="unidadesMin"
+            (change)="filtrarPorFecha()">
+          <input type="number" class="form-control" placeholder="Max" [(ngModel)]="unidadesMax"
+            (change)="filtrarPorFecha()">
+        </div>
+      </div>
+
+      <!-- 4. Rango Total ($) -->
+      <div class="col-12 col-md-2">
+        <label class="form-label mb-1 fw-semibold text-secondary small">💰 Total ($)</label>
+        <div class="input-group input-group-sm">
+          <input type="number" class="form-control" placeholder="Min" [(ngModel)]="totalMin"
+            (change)="filtrarPorFecha()">
+          <input type="number" class="form-control" placeholder="Max" [(ngModel)]="totalMax"
+            (change)="filtrarPorFecha()">
+        </div>
+      </div>
+
     </div>
 
     <!-- Totales -->

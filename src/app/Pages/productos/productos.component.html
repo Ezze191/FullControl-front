@@ -31,16 +31,76 @@
   </div>
 </div>
 
-<!-- Buscador -->
-<div class="container my-3">
-  <div class="row">
-    <div class="col-md-4 ms-auto">
-      <input type="text" class="form-control form-control-sm" placeholder="🔍 Buscar por nombre"
-        [(ngModel)]="terminoBusqueda">
+<!-- Toolbar de Filtros Avanzados -->
+<div class="card shadow-sm mb-4 border-0 bg-light">
+  <div class="card-body">
+    <h6 class="card-subtitle mb-3 text-muted fw-bold">🔍 Filtros Avanzados</h6>
+    <div class="row g-3">
+
+      <!-- 1. Buscador General -->
+      <div class="col-12 col-md-4">
+        <label class="form-label small text-muted mb-1">Búsqueda (Nombre/PLU)</label>
+        <div class="input-group input-group-sm">
+          <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+          <input type="text" class="form-control" placeholder="Escribe para buscar..." [(ngModel)]="terminoBusqueda">
+        </div>
+      </div>
+
+      <!-- 2. Proveedor -->
+      <div class="col-12 col-md-4">
+        <label class="form-label small text-muted mb-1">Proveedor</label>
+        <select class="form-select form-select-sm" [(ngModel)]="filtroProveedor">
+          <option value="">-- Todos --</option>
+          <option *ngFor="let prov of proveedores" [value]="prov">{{ prov }}</option>
+        </select>
+      </div>
+
+      <!-- 3. Rango Fechas (Último Ingreso) -->
+      <div class="col-12 col-md-4">
+        <label class="form-label small text-muted mb-1">Último Ingreso</label>
+        <div class="input-group input-group-sm">
+          <input type="date" class="form-control" [(ngModel)]="fechaInicio">
+          <span class="input-group-text">-</span>
+          <input type="date" class="form-control" [(ngModel)]="fechaFin">
+        </div>
+      </div>
+
+      <!-- 4. Precio Venta -->
+      <div class="col-12 col-md-4">
+        <label class="form-label small text-muted mb-1">Precio Venta ($)</label>
+        <div class="input-group input-group-sm">
+          <span class="input-group-text">$</span>
+          <input type="number" class="form-control" placeholder="Min" [(ngModel)]="precioMin">
+          <span class="input-group-text">-</span>
+          <input type="number" class="form-control" placeholder="Max" [(ngModel)]="precioMax">
+        </div>
+      </div>
+
+      <!-- 5. Precio Compra -->
+      <div class="col-12 col-md-4">
+        <label class="form-label small text-muted mb-1">Precio Compra ($)</label>
+        <div class="input-group input-group-sm">
+          <span class="input-group-text">$</span>
+          <input type="number" class="form-control" placeholder="Min" [(ngModel)]="compraMin">
+          <span class="input-group-text">-</span>
+          <input type="number" class="form-control" placeholder="Max" [(ngModel)]="compraMax">
+        </div>
+      </div>
+
+      <!-- 6. Existencia -->
+      <div class="col-12 col-md-4">
+        <label class="form-label small text-muted mb-1">Existencia (Unidades)</label>
+        <div class="input-group input-group-sm">
+          <span class="input-group-text">#</span>
+          <input type="number" class="form-control" placeholder="Min" [(ngModel)]="stockMin">
+          <span class="input-group-text">-</span>
+          <input type="number" class="form-control" placeholder="Max" [(ngModel)]="stockMax">
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
-
 <!-- Spinner -->
 <div class="text-center" *ngIf="SpinnerLoading">
   <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">

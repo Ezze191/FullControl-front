@@ -39,6 +39,24 @@ export class ProductosComponent {
 
   //creamos el objeto donde se va almacenar las tareas:
   productos: Producto[] = [];
+  proveedores: string[] = [];
+
+  // Filtros
+  filtroProveedor: string = '';
+
+  // Precios
+  precioMin: number | null = null;
+  precioMax: number | null = null;
+  compraMin: number | null = null;
+  compraMax: number | null = null; // Nuevo
+
+  // Existencia (Stock)
+  stockMin: number | null = null; // Nuevo
+  stockMax: number | null = null; // Nuevo
+
+  // Fechas (Último Ingreso)
+  fechaInicio: string = ''; // Nuevo
+  fechaFin: string = ''; // Nuevo
 
   editarFM!: FormGroup;
 
@@ -85,6 +103,8 @@ export class ProductosComponent {
     this.SpinnerLoading = true;
     this.productoService.getProductos().subscribe(data => {
       this.productos = data;
+      // Extraer proveedores únicos
+      this.proveedores = [...new Set(data.map(p => String(p.PROVEDOR)))].filter(p => p).sort();
       this.SpinnerLoading = false;
     });
   }
@@ -181,13 +201,44 @@ export class ProductosComponent {
   terminoBusqueda: string = '';
 
   get productosFiltrados() {
-    if (!this.terminoBusqueda.trim()) {
-      return this.productos;
-    }
+    return this.productos.filter(p => {
+      // Filtro por nombre (búsqueda)
+      const busqueda = this.terminoBusqueda.toLowerCase();
+      const nombre = String(p.NOMBRE || '').toLowerCase();
+      const plu = String(p.PLU || '').toLowerCase();
 
-    return this.productos.filter(p =>
-      (p.NOMBRE || '').toLowerCase().includes(this.terminoBusqueda.toLowerCase())
-    );
+      const matchesSearch = !this.terminoBusqueda.trim() ||
+        nombre.includes(busqueda) ||
+        plu.includes(busqueda);
+
+      // Filtro por proveedor
+      const matchesProvider = !this.filtroProveedor || String(p.PROVEDOR) === this.filtroProveedor;
+
+      // Filtro por precio (Venta)
+      const matchesMinPrice = this.precioMin === null || p.PRECIO_VENTA >= this.precioMin;
+      const matchesMaxPrice = this.precioMax === null || p.PRECIO_VENTA <= this.precioMax;
+
+      // Filtro por precio (Compra)
+      const matchesMinCompra = this.compraMin === null || p.PRECIO_COMPRA >= this.compraMin;
+      const matchesMaxCompra = this.compraMax === null || p.PRECIO_COMPRA <= this.compraMax;
+
+      // Filtro por Existencia
+      const matchesMinStock = this.stockMin === null || p.EXISTENCIA >= this.stockMin;
+      const matchesMaxStock = this.stockMax === null || p.EXISTENCIA <= this.stockMax;
+
+      // Filtro por Fecha (Último Ingreso)
+      let matchesDate = true;
+      if (this.fechaInicio && this.fechaFin && p.ULTIMO_INGRESO) {
+        const prodDate = new Date(p.ULTIMO_INGRESO).toISOString().slice(0, 10);
+        matchesDate = prodDate >= this.fechaInicio && prodDate <= this.fechaFin;
+      }
+
+      return matchesSearch && matchesProvider &&
+        matchesMinPrice && matchesMaxPrice &&
+        matchesMinCompra && matchesMaxCompra &&
+        matchesMinStock && matchesMaxStock &&
+        matchesDate;
+    });
   }
 
 
@@ -363,12 +414,12 @@ export class ProductosComponent {
 
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      
+
       // Timeout para evitar que se quede colgado
       const timeout = setTimeout(() => {
         resolve('');
       }, 5000); // 5 segundos de timeout
-      
+
       img.onload = () => {
         clearTimeout(timeout);
         try {
@@ -394,7 +445,7 @@ export class ProductosComponent {
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
-          
+
           if (ctx) {
             ctx.drawImage(img, 0, 0, width, height);
             const base64 = canvas.toDataURL('image/jpeg', 0.85);
@@ -407,13 +458,13 @@ export class ProductosComponent {
           resolve('');
         }
       };
-      
+
       img.onerror = () => {
         clearTimeout(timeout);
         // Si falla cargar la imagen, retornar vacío
         resolve('');
       };
-      
+
       img.src = url;
     });
   }
@@ -428,7 +479,7 @@ export class ProductosComponent {
       const nombreB = (b.NOMBRE || '').toLowerCase();
       return nombreA.localeCompare(nombreB);
     });
-    
+
     if (productos.length === 0) {
       this.SpinnerLoading = false;
       alert('No hay productos para exportar');
@@ -444,7 +495,7 @@ export class ProductosComponent {
     const imgHeight = 40;
     const imgWidth = 50;
     const espacioEntreCards = 5;
-    
+
     let x = margin;
     let y = margin + 20; // Espacio para el título
     let primeraPagina = true;
@@ -455,18 +506,18 @@ export class ProductosComponent {
     const dibujarLetraInicial = (letra: string, esPrimeraPagina: boolean) => {
       // Obtener la primera letra del nombre en mayúscula
       const primeraLetra = letra.toUpperCase();
-      
+
       // Ajustar la posición Y según si es la primera página o no
       const posY = esPrimeraPagina ? 20 : 6;
       const posX = pageWidth - 10;
       const tamanoBadge = 12;
-      
+
       // Dibujar badge redondeado de fondo para la letra (más elegante y compatible)
       doc.setFillColor(248, 249, 250); // Fondo gris muy claro
       doc.setDrawColor(206, 212, 218); // Borde gris
       doc.setLineWidth(0.2);
       doc.roundedRect(posX - tamanoBadge, posY - tamanoBadge / 2, tamanoBadge, tamanoBadge, 2, 2, 'FD');
-      
+
       // Dibujar letra más pequeña y elegante
       doc.setTextColor(73, 80, 87); // Color gris oscuro
       doc.setFontSize(24);
@@ -486,7 +537,7 @@ export class ProductosComponent {
     const tituloTexto = 'CATÁLOGO DE PRODUCTOS';
     const tituloWidth = doc.getTextWidth(tituloTexto);
     doc.text(tituloTexto, (pageWidth - tituloWidth) / 2, 12);
-    
+
     // Fecha
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
@@ -501,17 +552,17 @@ export class ProductosComponent {
     // Procesar productos
     for (let i = 0; i < productos.length; i++) {
       const producto = productos[i];
-      
+
       // Obtener la primera letra del nombre del producto
       const primeraLetraProducto = (producto.NOMBRE || '').charAt(0).toUpperCase() || '#';
       // Si la letra no es válida (número, símbolo), usar '#'
       const letraValida = /[A-ZÁÉÍÓÚÑ]/.test(primeraLetraProducto) ? primeraLetraProducto : '#';
-      
+
       // Verificar si necesitamos una nueva página ANTES de dibujar el producto
       // Verificar tanto si estamos en la primera columna como en la segunda
       const espacioDisponible = pageHeight - margin - y;
       const necesitaNuevaPagina = espacioDisponible < cardHeight;
-      
+
       if (necesitaNuevaPagina) {
         doc.addPage();
         numeroPagina++;
@@ -535,7 +586,7 @@ export class ProductosComponent {
       doc.setDrawColor(200, 200, 200);
       doc.setFillColor(250, 250, 250);
       doc.roundedRect(cardX + 0.5, cardY + 0.5, cardWidth - 1, cardHeight - 1, 2, 2, 'F');
-      
+
       // Borde de la card
       doc.setDrawColor(220, 220, 220);
       doc.setLineWidth(0.5);
@@ -544,17 +595,17 @@ export class ProductosComponent {
       // Header de la card (color primary)
       doc.setFillColor(13, 110, 253);
       doc.roundedRect(cardX, cardY, cardWidth, 12, 2, 2, 'F');
-      
+
       // Nombre del producto en el header (mejor manejo de texto largo)
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(8);
       doc.setFont('helvetica', 'bold');
       const nombre = (producto.NOMBRE || 'Sin nombre').toUpperCase();
-      
+
       // Usar splitTextToSize de jsPDF para dividir automáticamente el texto
       const maxWidthNombre = cardWidth - 6;
       const lineasNombre = doc.splitTextToSize(nombre, maxWidthNombre);
-      
+
       if (lineasNombre.length === 1) {
         // Una sola línea - centrar verticalmente
         doc.text(lineasNombre[0], cardX + cardWidth / 2, cardY + 8, {
@@ -573,8 +624,8 @@ export class ProductosComponent {
         doc.text(lineasNombre[0], cardX + cardWidth / 2, cardY + 6.5, {
           align: 'center'
         });
-        const segundaLinea = lineasNombre[1].length > 18 
-          ? lineasNombre[1].substring(0, 15) + '...' 
+        const segundaLinea = lineasNombre[1].length > 18
+          ? lineasNombre[1].substring(0, 15) + '...'
           : lineasNombre[1];
         doc.text(segundaLinea, cardX + cardWidth / 2, cardY + 9.5, {
           align: 'center'
@@ -583,17 +634,17 @@ export class ProductosComponent {
 
       // Cuerpo de la card
       const bodyY = cardY + 12;
-      
+
       // Cargar y dibujar imagen
       try {
         const imagenBase64 = await this.cargarImagenComoBase64(producto.IMAGE_PATH);
         if (imagenBase64) {
-          doc.addImage(imagenBase64, 'JPEG', 
-            cardX + (cardWidth - imgWidth) / 2, 
-            bodyY + 2, 
-            imgWidth, 
-            imgHeight, 
-            undefined, 
+          doc.addImage(imagenBase64, 'JPEG',
+            cardX + (cardWidth - imgWidth) / 2,
+            bodyY + 2,
+            imgWidth,
+            imgHeight,
+            undefined,
             'FAST'
           );
         } else {
@@ -616,23 +667,23 @@ export class ProductosComponent {
       // Precio de venta con fondo destacado (mejorado)
       const precioY = bodyY + imgHeight + 6;
       const precioTexto = `$${producto.PRECIO_VENTA.toFixed(2)}`;
-      
+
       // Calcular dimensiones del badge de precio
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
       const precioWidth = doc.getTextWidth(precioTexto) + 6;
       const precioHeight = 5.5;
       const precioX = cardX + (cardWidth - precioWidth) / 2;
-      
+
       // Fondo para el precio (badge style mejorado)
       doc.setFillColor(40, 167, 69); // Color success de Bootstrap
       doc.setDrawColor(34, 139, 58); // Borde más oscuro
       doc.setLineWidth(0.2);
       doc.roundedRect(precioX, precioY - precioHeight / 2, precioWidth, precioHeight, 1, 1, 'FD');
-      
+
       // Texto del precio
       doc.setTextColor(255, 255, 255);
-      doc.text(precioTexto, cardX + cardWidth / 2, precioY, { 
+      doc.text(precioTexto, cardX + cardWidth / 2, precioY, {
         align: 'center',
         baseline: 'middle'
       });

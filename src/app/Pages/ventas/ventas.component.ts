@@ -20,6 +20,14 @@ export class VentasComponent implements OnInit {
   fechaFiltro: string = '';
   fechaInicio: string = '';
   fechaFin: string = '';
+  terminoBusqueda: string = '';
+
+  // Filtros Avanzados
+  unidadesMin: number | null = null;
+  unidadesMax: number | null = null;
+
+  totalMin: number | null = null;
+  totalMax: number | null = null;
 
   constructor(private VentasService: VentasService) { }
 
@@ -40,8 +48,28 @@ export class VentasComponent implements OnInit {
 
   filtrarPorFecha() {
     this.ventasFiltradas = this.ventas.filter(venta => {
+      // 1. Fecha
       const fechaVenta = new Date(venta.FECHA).toISOString().slice(0, 10);
-      return fechaVenta >= this.fechaInicio && fechaVenta <= this.fechaFin;
+      const inDateRange = (!this.fechaInicio || fechaVenta >= this.fechaInicio) &&
+        (!this.fechaFin || fechaVenta <= this.fechaFin);
+
+      // 2. Búsqueda (Nombre o ID)
+      const search = this.terminoBusqueda.toLowerCase();
+      const matchesSearch = !this.terminoBusqueda.trim() ||
+        (venta.PRODUCT_NAME || '').toLowerCase().includes(search) ||
+        String(venta.ID).includes(search);
+
+      // 3. Unidades
+      const matchesUnidadesMin = this.unidadesMin === null || Number(venta.EXISTENCIA_DE_SALIDA) >= this.unidadesMin;
+      const matchesUnidadesMax = this.unidadesMax === null || Number(venta.EXISTENCIA_DE_SALIDA) <= this.unidadesMax;
+
+      // 4. Total Generado
+      const matchesTotalMin = this.totalMin === null || Number(venta.DINERO_GENERADO) >= this.totalMin;
+      const matchesTotalMax = this.totalMax === null || Number(venta.DINERO_GENERADO) <= this.totalMax;
+
+      return inDateRange && matchesSearch &&
+        matchesUnidadesMin && matchesUnidadesMax &&
+        matchesTotalMin && matchesTotalMax;
     });
   }
 

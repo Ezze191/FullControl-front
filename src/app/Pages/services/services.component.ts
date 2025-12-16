@@ -60,17 +60,27 @@ export class ServicesComponent {
     });
   }
 
-   ngOnDestroy() {
+  ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
   wordSearch: string = ''
+  minComision: number | null = null;
+  maxComision: number | null = null;
 
   get FilterServices() {
-    if (!this.wordSearch.trim()) {
-      return this.services
-    }
-    return this.services.filter(p => (p.name || '').toLowerCase().includes(this.wordSearch.toLowerCase()))
+    return this.services.filter(p => {
+      // Search in Name OR Description
+      const search = this.wordSearch.toLowerCase();
+      const matchesSearch = !this.wordSearch.trim() ||
+        (p.name || '').toLowerCase().includes(search) ||
+        (p.description || '').toLowerCase().includes(search);
+
+      const matchesMinCha = this.minComision === null || p.commission >= this.minComision;
+      const matchesMaxCha = this.maxComision === null || p.commission <= this.maxComision;
+
+      return matchesSearch && matchesMinCha && matchesMaxCha;
+    })
   }
 
   deleteService(id: number) {

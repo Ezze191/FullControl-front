@@ -47,7 +47,7 @@ export class OrdenesComponent {
     this.cargarCarritoDesdeLocalStorage();
     this.getOrders();
 
-    this.subscription = this.orderservice.ordersActualizados$.subscribe(()=> {
+    this.subscription = this.orderservice.ordersActualizados$.subscribe(() => {
       this.getOrders();
     });
 
@@ -58,6 +58,33 @@ export class OrdenesComponent {
       phoneNumber: [''],
       price: ['']
     });
+  }
+
+  // Filtros
+  filtroEstado: string = 'normal'; // normal, terminadas, pendientes, todas
+  fechaInicio: string = '';
+  fechaFin: string = '';
+  wordSearch: string = '';
+
+  precioMin: number | null = null;
+  precioMax: number | null = null;
+
+  cambiarEstado() {
+    this.SpinnerLoading = true;
+    switch (this.filtroEstado) {
+      case 'terminadas':
+        this.orderservice.getOlnyFinished().subscribe(data => { this.Orders = data; this.SpinnerLoading = false; });
+        break;
+      case 'pendientes':
+        this.orderservice.getOnlyNotFinished().subscribe(data => { this.Orders = data; this.SpinnerLoading = false; });
+        break;
+      case 'todas':
+        this.orderservice.getAllOrders().subscribe(data => { this.Orders = data; this.SpinnerLoading = false; });
+        break;
+      default: // normal
+        this.orderservice.getOrders().subscribe(data => { this.Orders = data; this.SpinnerLoading = false; });
+        break;
+    }
   }
 
   cargarCarritoDesdeLocalStorage() {
@@ -169,13 +196,31 @@ export class OrdenesComponent {
     });
   }
 
-  wordSearch: string = ''
+
 
   get FilterOrders() {
-    if (!this.wordSearch.trim()) {
-      return this.Orders
-    }
-    return this.Orders.filter(p => (p.customerName || '').toLowerCase().includes(this.wordSearch.toLowerCase()))
+    return this.Orders.filter(p => {
+      // Búsqueda
+      const search = this.wordSearch.toLowerCase();
+      const matchesSearch = !this.wordSearch.trim() ||
+        (p.customerName || '').toLowerCase().includes(search) ||
+        (p.description || '').toLowerCase().includes(search) ||
+        String(p.phoneNumber || '').includes(search) ||
+        String(p.id).includes(search);
+
+      // Fecha
+      let matchesDate = true;
+      if (this.fechaInicio && this.fechaFin) {
+        const orderDate = new Date(p.date).toISOString().slice(0, 10);
+        matchesDate = orderDate >= this.fechaInicio && orderDate <= this.fechaFin;
+      }
+
+      // Precio
+      const matchesMinPrice = this.precioMin === null || p.price >= this.precioMin;
+      const matchesMaxPrice = this.precioMax === null || p.price <= this.precioMax;
+
+      return matchesSearch && matchesDate && matchesMinPrice && matchesMaxPrice;
+    });
   }
 
   deleteOrder(id: number) {
