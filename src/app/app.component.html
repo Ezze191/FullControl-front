@@ -1,66 +1,84 @@
 <div class="container-fluid">
   <div class="row flex-nowrap">
-    <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
-      <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+    <!-- Sidebar -->
+    <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 sidebar-bg text-white"
+      style="background-color: var(--sidebar-bg); min-height: 100vh;">
+      <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-4 text-white min-vh-100">
         <a href="/" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-          <span class="fs-5 d-none d-sm-inline">Menu</span>
+          <i class="bi bi-layers-fill fs-3 me-2 text-primary"></i>
+          <span class="fs-4 fw-bold d-none d-sm-inline">FullControl</span>
         </a>
-        <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
+        <hr class="text-white w-100 opacity-25">
 
-          <li class="nav-item">
-            <a routerLinkActive="active" routerLink="/inicio" class="nav-link align-middle px-0">
-              <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Inicio</span>
+        <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start w-100" id="menu">
+
+          <li class="nav-item w-100">
+            <a routerLinkActive="active" routerLink="/dashboard" class="nav-link align-middle sidebar-link">
+              <i class="bi bi-speedometer2 sidebar-icon"></i> <span class="ms-1 d-none d-sm-inline">Dashboard</span>
             </a>
           </li>
-          <li>
-            <a routerLinkActive="active" routerLink="/productos" data-bs-toggle="collapse"
-              class="nav-link px-0 align-middle">
-              <i class="fs-4 bi-brush-fill"></i> <span class="ms-1 d-none d-sm-inline">Productos</span> </a>
+
+          <li class="nav-item w-100">
+            <a routerLinkActive="active" routerLink="/cobrar" class="nav-link align-middle sidebar-link">
+              <i class="bi bi-cash-coin sidebar-icon"></i> <span class="ms-1 d-none d-sm-inline">Cobrar</span>
+            </a>
           </li>
-          <li>
-            <a routerLinkActive="active" routerLink="/productos-temporada" data-bs-toggle="collapse"
-              class="nav-link px-0 align-middle">
-              <i class="fs-4 bi-stars"></i> <span class="ms-1 d-none d-sm-inline">Temporada</span> </a>
+
+          <li class="w-100">
+            <a routerLinkActive="active" routerLink="/productos" class="nav-link align-middle sidebar-link">
+              <i class="bi bi-box-seam sidebar-icon"></i> <span class="ms-1 d-none d-sm-inline">Productos</span>
+            </a>
           </li>
-          <li>
-            <a routerLinkActive="active" routerLink="/ofertas" data-bs-toggle="collapse"
-              class="nav-link px-0 align-middle">
-              <i class="fs-4 bi-tags-fill"></i> <span class="ms-1 d-none d-sm-inline">Ofertas</span> </a>
+
+          <li class="w-100">
+            <a routerLinkActive="active" routerLink="/productos-temporada" class="nav-link align-middle sidebar-link">
+              <i class="bi bi-calendar-event sidebar-icon"></i> <span class="ms-1 d-none d-sm-inline">Temporada</span>
+            </a>
           </li>
-          <li>
-            <a routerLinkActive="active" routerLink="/servicios" data-bs-toggle="collapse"
-              class="nav-link px-0 align-middle">
-              <i class="fs-4 bi bi-shop"></i> <span class="ms-1 d-none d-sm-inline">Servicios</span> </a>
+
+          <li class="w-100">
+            <a routerLinkActive="active" routerLink="/ofertas" class="nav-link align-middle sidebar-link">
+              <i class="bi bi-tags sidebar-icon"></i> <span class="ms-1 d-none d-sm-inline">Ofertas</span>
+            </a>
           </li>
-          <li>
-            <a routerLinkActive="active" routerLink="/inventario" class="nav-link px-0 align-middle">
-              <i class="fs-4 bi-file-spreadsheet"></i> <span class="ms-1 d-none d-sm-inline">Entradas/Salidas</span></a>
+
+          <li class="w-100">
+            <a routerLinkActive="active" routerLink="/servicios" class="nav-link align-middle sidebar-link">
+              <i class="bi bi-shop sidebar-icon"></i> <span class="ms-1 d-none d-sm-inline">Servicios</span>
+            </a>
           </li>
-          <li>
-            <a routerLinkActive="active" routerLink="/ventas" data-bs-toggle="collapse"
-              class="nav-link px-0 align-middle ">
-              <i class="fs-4 bi-cart-fill"></i> <span class="ms-1 d-none d-sm-inline">Ventas</span></a>
-            <ul class="collapse nav flex-column ms-1" id="submenu2" data-bs-parent="#menu">
-              <li class="w-100">
-                <a href="#" class="nav-link px-0"> <span class="d-none d-sm-inline"></span> 1</a>
-              </li>
-            </ul>
+
+          <li class="w-100">
+            <a routerLinkActive="active" routerLink="/inventario" class="nav-link align-middle sidebar-link">
+              <i class="bi bi-clipboard-data sidebar-icon"></i> <span
+                class="ms-1 d-none d-sm-inline">Entradas/Salidas</span>
+            </a>
           </li>
-          <li>
-            <a routerLinkActive="active" routerLink="/maquinas" data-bs-toggle="collapse"
-              class="nav-link px-0 align-middle">
-              <i class="fs-4 bi-printer-fill"></i> <span class="ms-1 d-none d-sm-inline">Materiales</span> </a>
+
+          <li class="w-100">
+            <a routerLinkActive="active" routerLink="/ventas" class="nav-link align-middle sidebar-link">
+              <i class="bi bi-cart sidebar-icon"></i> <span class="ms-1 d-none d-sm-inline">Ventas</span>
+            </a>
           </li>
-          <li>
-            <a routerLinkActive="active" routerLink="/ordenes" class="nav-link px-0 align-middle">
-              <i class="fs-4 bi-people"></i> <span class="ms-1 d-none d-sm-inline">Ordenes</span> </a>
+
+          <li class="w-100">
+            <a routerLinkActive="active" routerLink="/maquinas" class="nav-link align-middle sidebar-link">
+              <i class="bi bi-tools sidebar-icon"></i> <span class="ms-1 d-none d-sm-inline">Materiales</span>
+            </a>
+          </li>
+
+          <li class="w-100">
+            <a routerLinkActive="active" routerLink="/ordenes" class="nav-link align-middle sidebar-link">
+              <i class="bi bi-people sidebar-icon"></i> <span class="ms-1 d-none d-sm-inline">Ordenes</span>
+            </a>
           </li>
         </ul>
-        <hr>
       </div>
     </div>
-    <div class="col py-3">
-      <router-outlet />
+
+    <!-- Main Content -->
+    <div class="col py-4 px-4 bg-light min-vh-100">
+      <router-outlet></router-outlet>
     </div>
   </div>
 </div>

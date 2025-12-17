@@ -1,0 +1,186 @@
+<div class="row mb-4 animate-fade-in">
+    <div class="col-12">
+        <h2 class="fw-bold text-dark">{{ greeting }}<span class="text-primary"></span> 👋</h2>
+        <p class="text-muted">Aquí tienes un resumen de la actividad de tu negocio.</p>
+    </div>
+</div>
+
+<!-- Loading State -->
+<div *ngIf="isLoading" class="d-flex justify-content-center align-items-center" style="height: 300px;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+    </div>
+</div>
+
+<!-- Content -->
+<div *ngIf="!isLoading" class="row g-4 animate-fade-in">
+
+    <!-- Card 1: Ingresos Totales -->
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card card-premium h-100 border-start border-4 border-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-bold">Ingresos Totales</span>
+                        <h3 class="mb-0 fw-bold text-dark">${{ totalIngresos | number:'1.2-2' }}</h3>
+                    </div>
+                    <div class="icon-circle bg-success bg-opacity-10 text-success p-3 rounded-circle">
+                        <i class="bi bi-currency-dollar fs-4"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-success bg-opacity-10 text-success me-2">
+                        <i class="bi bi-arrow-up-short"></i> Histórico
+                    </span>
+                    <span class="text-muted small">Desde el inicio</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 2: Ventas Hoy -->
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card card-premium h-100 border-start border-4 border-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-bold">Ventas Hoy</span>
+                        <h3 class="mb-0 fw-bold text-dark">${{ ingresosHoy | number:'1.2-2' }}</h3>
+                    </div>
+                    <div class="icon-circle bg-primary bg-opacity-10 text-primary p-3 rounded-circle">
+                        <i class="bi bi-cart-check fs-4"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-primary bg-opacity-10 text-primary me-2">
+                        <i class="bi bi-calendar-check"></i> Hoy
+                    </span>
+                    <span class="text-muted small">Actividad diaria</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: Productos Totales -->
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card card-premium h-100 border-start border-4 border-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-bold">Productos</span>
+                        <h3 class="mb-0 fw-bold text-dark">{{ totalProductos }}</h3>
+                    </div>
+                    <div class="icon-circle bg-info bg-opacity-10 text-info p-3 rounded-circle">
+                        <i class="bi bi-box-seam fs-4"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-danger bg-opacity-10 text-danger me-2" *ngIf="productosBajoStock > 0">
+                        <i class="bi bi-exclamation-circle"></i> {{ productosBajoStock }} bajo stock
+                    </span>
+                    <span class="badge bg-success bg-opacity-10 text-success me-2" *ngIf="productosBajoStock === 0">
+                        <i class="bi bi-check-circle"></i> Stock OK
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 4: Materiales -->
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card card-premium h-100 border-start border-4 border-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-bold">Materiales</span>
+                        <h3 class="mb-0 fw-bold text-dark">{{ totalMateriales }}</h3>
+                    </div>
+                    <div class="icon-circle bg-warning bg-opacity-10 text-warning p-3 rounded-circle">
+                        <i class="bi bi-tools fs-4"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="text-muted small">Inventario de uso interno</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-2 animate-fade-in" *ngIf="!isLoading">
+    <!-- Accesos Rápidos -->
+    <div class="col-12 col-lg-8">
+        <div class="card card-premium h-100">
+            <div class="card-header bg-white border-bottom border-light py-3">
+                <h5 class="mb-0 fw-bold text-dark">Accesos Rápidos</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-6 col-md-3 text-center">
+                        <a href="/ventas" class="text-decoration-none">
+                            <div class="p-3 rounded-3 bg-light hover-effect border border-light">
+                                <i class="bi bi-cart-plus fs-2 text-primary mb-2 d-block"></i>
+                                <span class="fw-bold text-dark small">Nueva Venta</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                        <a href="/productos" class="text-decoration-none">
+                            <div class="p-3 rounded-3 bg-light hover-effect border border-light">
+                                <i class="bi bi-plus-circle fs-2 text-success mb-2 d-block"></i>
+                                <span class="fw-bold text-dark small">Agregar Producto</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                        <a href="/maquinas" class="text-decoration-none">
+                            <div class="p-3 rounded-3 bg-light hover-effect border border-light">
+                                <i class="bi bi-gear fs-2 text-warning mb-2 d-block"></i>
+                                <span class="fw-bold text-dark small">Materiales</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                        <a href="/inventario" class="text-decoration-none">
+                            <div class="p-3 rounded-3 bg-light hover-effect border border-light">
+                                <i class="bi bi-clipboard-data fs-2 text-info mb-2 d-block"></i>
+                                <span class="fw-bold text-dark small">Inventario</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen Secundario -->
+    <div class="col-12 col-lg-4">
+        <div class="card card-premium h-100">
+            <div class="card-header bg-white border-bottom border-light py-3">
+                <h5 class="mb-0 fw-bold text-dark">Otros Datos</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3 border-light">
+                        <span class="d-flex align-items-center">
+                            <i class="bi bi-stars text-warning me-2"></i> Productos Temporada
+                        </span>
+                        <span class="badge bg-warning rounded-pill text-dark">{{ productosTemporada }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3 border-light">
+                        <span class="d-flex align-items-center">
+                            <i class="bi bi-tags text-danger me-2"></i> Ofertas Activas
+                        </span>
+                        <span class="badge bg-danger rounded-pill">{{ totalOfertas }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3 border-light">
+                        <span class="d-flex align-items-center">
+                            <i class="bi bi-receipt text-secondary me-2"></i> Total Transacciones
+                        </span>
+                        <span class="badge bg-secondary rounded-pill">{{ totalVentas }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

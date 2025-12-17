@@ -12,8 +12,13 @@ import { AgregarOfertaComponent } from './Pages/ofertas/agregar-oferta/agregar-o
 import { AgregarProductoTemporadaComponent } from './Pages/productos-temporada/agregar-producto-temporada/agregar-producto-temporada.component';
 
 
+import { DashboardComponent } from './Pages/dashboard/dashboard.component';
+
+
 export const routes: Routes = [
-    { path: 'inicio', component: InicioComponent },
+    { path: 'dashboard', component: DashboardComponent },
+    { path: 'cobrar', component: InicioComponent },
+    { path: 'inicio', redirectTo: '/dashboard', pathMatch: 'full' },
     { path: 'productos', component: ProductosComponent },
     { path: 'productos-temporada', component: ProductosTemporadaComponent },
     { path: 'agregar-producto-temporada', component: AgregarProductoTemporadaComponent },
@@ -26,6 +31,6 @@ export const routes: Routes = [
     { path: 'ventas', component: VentasComponent },
     { path: 'maquinas', component: MaquinasComponent },
     { path: 'ordenes', component: OrdenesComponent },
-    { path: '', redirectTo: '/inicio', pathMatch: 'full' }
+    { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
 
 ];

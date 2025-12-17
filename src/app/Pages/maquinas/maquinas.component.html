@@ -99,8 +99,8 @@
   <div class="container">
     <div class="row">
       <div class="col-lg-4 col-md-6 mb-4" *ngFor="let material of FilterMaterials">
-        <div class="card h-100 shadow-sm border-0">
-          <div class="card-header bg-primary text-white text-center">
+        <div class="card card-premium h-100">
+          <div class="card-header card-header-premium text-center">
             <h5 class="mb-0 fw-semibold text-uppercase"> {{material.name}} </h5>
           </div>
           <div class="card-body text-center">
@@ -119,7 +119,7 @@
 
             <div class="d-grid gap-2">
               <a [href]="material.buyLink" target="_blank" class="btn btn-outline-success">🛍️ Comprar</a>
-              <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+              <button type="button" class="btn btn-sm btn-outline-premium" data-bs-toggle="modal"
                 (click)="modalEdit(material)" data-bs-target="#editmodal">
                 ✏️ Editar
               </button>
