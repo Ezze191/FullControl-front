@@ -183,7 +183,23 @@
           </div>
           <div class="mb-3">
             <label class="form-label">IMAGEN</label>
-            <input type="file" class="form-control" (change)="seleccionarArchivo($event)" required>
+
+            <div class="d-flex gap-3 mb-2">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="editImageMode" id="editModeFile"
+                  [checked]="!urlImageMode" (change)="toggleImageMode()">
+                <label class="form-check-label" for="editModeFile">Subir Archivo</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="editImageMode" id="editModeUrl"
+                  [checked]="urlImageMode" (change)="toggleImageMode()">
+                <label class="form-check-label" for="editModeUrl">URL de Imagen</label>
+              </div>
+            </div>
+
+            <input *ngIf="!urlImageMode" type="file" class="form-control" (change)="seleccionarArchivo($event)" />
+            <input *ngIf="urlImageMode" type="text" class="form-control" placeholder="https://ejemplo.com/imagen.jpg"
+              formControlName="IMAGE_PATH" />
           </div>
         </div>
         <div class="modal-footer">

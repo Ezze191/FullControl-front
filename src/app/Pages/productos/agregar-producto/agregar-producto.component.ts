@@ -1,7 +1,7 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { Producto } from '../../../interfaces/producto.model';
 import { ProductosService } from '../../../services/productos.service';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -10,13 +10,13 @@ declare var bootstrap: any;
 @Component({
   selector: 'app-agregar-producto',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './agregar-producto.component.html',
   styleUrl: './agregar-producto.component.css'
 })
 export class AgregarProductoComponent {
   productForm: FormGroup;
-
+  urlImageMode: boolean = false;
 
   @ViewChild('toastElement') toastElement!: ElementRef;
   toastMessage: string = '';
@@ -48,6 +48,13 @@ export class AgregarProductoComponent {
     });
   }
 
+  toggleImageMode() {
+    this.urlImageMode = !this.urlImageMode;
+    // Limpiar el valor al cambiar de modo para evitar confusiones
+    this.productForm.patchValue({ IMAGE_PATH: '' });
+    this.imgPath = '';
+  }
+
   selectFile(event: Event) {
 
     const input = event.target as HTMLInputElement;
@@ -59,6 +66,7 @@ export class AgregarProductoComponent {
       this.productoservice.uploadImage(formData).subscribe({
         next: (res) => {
           this.imgPath = res.ruta;
+          this.productForm.patchValue({ IMAGE_PATH: res.ruta });
           console.log('ruta de imagen guardada', this.imgPath);
 
         },
@@ -82,7 +90,7 @@ export class AgregarProductoComponent {
         PRECIO_VENTA: this.productForm.value.PRECIO_VENTA,
         PROVEDOR: this.productForm.value.PROVEDOR,
         ULTIMO_INGRESO: this.productForm.value.ULTIMO_INGRESO,
-        IMAGE_PATH: this.imgPath || 'URL'
+        IMAGE_PATH: this.productForm.value.IMAGE_PATH || 'URL'
       };
 
 
@@ -99,6 +107,8 @@ export class AgregarProductoComponent {
           toast.show();
 
           this.imgPath = '';
+          this.productForm.reset(); // Resetear formulario completo
+          this.urlImageMode = false; // Resetear modo imagen
 
           this.productoservice.notificarActualizacion();
 

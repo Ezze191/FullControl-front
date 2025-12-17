@@ -60,7 +60,20 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">IMAGEN</label>
-                            <input type="file" class="form-control form-control-lg" (change)="selectFile($event)" />
+                            
+                            <div class="d-flex gap-3 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="imageMode" id="modeFile" [checked]="!urlImageMode" (change)="toggleImageMode()">
+                                    <label class="form-check-label" for="modeFile">Subir Archivo</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="imageMode" id="modeUrl" [checked]="urlImageMode" (change)="toggleImageMode()">
+                                    <label class="form-check-label" for="modeUrl">URL de Imagen</label>
+                                </div>
+                            </div>
+
+                            <input *ngIf="!urlImageMode" type="file" class="form-control form-control-lg" (change)="selectFile($event)" />
+                            <input *ngIf="urlImageMode" type="text" class="form-control form-control-lg" placeholder="https://ejemplo.com/imagen.jpg" formControlName="IMAGE_PATH" />
                         </div>
                     </div>
                 </div>

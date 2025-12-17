@@ -125,11 +125,26 @@ export class ProductosComponent {
       PROVEDOR: producto.PROVEDOR,
       ULTIMO_INGRESO: producto.ULTIMO_INGRESO,
       IMAGE_PATH: producto.IMAGE_PATH
-    })
+    });
+
+    // Detectar si es URL para activar el modo correspondiente
+    const path = producto.IMAGE_PATH || '';
+    this.urlImageMode = path.startsWith('http') || path.startsWith('https');
+    this.imgPath = '';
   }
 
   //guardar la ruta de la imagen:
   imgPath: string = '';
+  urlImageMode: boolean = false;
+
+  toggleImageMode() {
+    this.urlImageMode = !this.urlImageMode;
+    // Si cambiamos a modo archivo, limpiamos el path para obligar a seleccionar uno nuevo si se desea cambiar
+    if (!this.urlImageMode) {
+      this.editarFM.patchValue({ IMAGE_PATH: '' });
+      this.imgPath = '';
+    }
+  }
 
   seleccionarArchivo(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -141,6 +156,7 @@ export class ProductosComponent {
       this.productoService.uploadImage(formData).subscribe({
         next: (res) => {
           this.imgPath = res.ruta;
+          this.editarFM.patchValue({ IMAGE_PATH: res.ruta });
           console.log('ruta de imagen guardada:', this.imgPath);
         },
         error: (err) => {
@@ -163,6 +179,7 @@ export class ProductosComponent {
     if (this.imgPath) {
       datosNuevos.IMAGE_PATH = this.imgPath;
     }
+    // Si estamos en modo URL, el formControlName="IMAGE_PATH" ya tiene el valor correcto
 
     this.productoService.updateProducto(this.producto_id, datosNuevos)
       .subscribe(() => {

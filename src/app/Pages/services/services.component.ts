@@ -111,10 +111,24 @@ export class ServicesComponent {
       commission: service.commission,
       imagePath: service.imagePath
 
-    })
+    });
+
+    // Detectar si es URL para activar el modo correspondiente
+    const path = service.imagePath || '';
+    this.urlImageMode = path.startsWith('http') || path.startsWith('https');
+    this.imgPath = '';
   }
 
   imgPath: string = '';
+  urlImageMode: boolean = false;
+
+  toggleImageMode() {
+    this.urlImageMode = !this.urlImageMode;
+    if (!this.urlImageMode) {
+      this.editService.patchValue({ imagePath: '' });
+      this.imgPath = '';
+    }
+  }
 
   seleccionarArchivo(event: Event) {
     const input = event.target as HTMLInputElement
@@ -126,6 +140,7 @@ export class ServicesComponent {
       this.servicesService.uploadImage(formData).subscribe({
         next: (res) => {
           this.imgPath = res.ruta;
+          this.editService.patchValue({ imagePath: res.ruta });
         },
         error: (err) => {
           console.error('Error al subir la imagen', err);

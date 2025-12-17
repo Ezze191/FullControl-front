@@ -149,10 +149,24 @@ export class MaquinasComponent {
       lastIncome: material.lastIncome,
       imagePath: material.imagePath
 
-    })
+    });
+
+    // Detectar si es URL para activar el modo correspondiente
+    const path = material.imagePath || '';
+    this.urlImageMode = path.startsWith('http') || path.startsWith('https');
+    this.imgPath = '';
   }
 
   imgPath: string = '';
+  urlImageMode: boolean = false;
+
+  toggleImageMode() {
+    this.urlImageMode = !this.urlImageMode;
+    if (!this.urlImageMode) {
+      this.editMaterial.patchValue({ imagePath: '' });
+      this.imgPath = '';
+    }
+  }
 
   seleccionarArchivo(event: Event) {
     const input = event.target as HTMLInputElement
@@ -164,6 +178,7 @@ export class MaquinasComponent {
       this.materialservice.uploadImage(formData).subscribe({
         next: (res) => {
           this.imgPath = res.ruta;
+          this.editMaterial.patchValue({ imagePath: res.ruta });
         },
         error: (err) => {
           console.error('Error al subir la imagen', err);

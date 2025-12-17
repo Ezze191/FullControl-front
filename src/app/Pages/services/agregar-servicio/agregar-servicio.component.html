@@ -21,20 +21,40 @@
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label fw-semibold">NOMBRE</label>
-                        <input type="text" class="form-control form-control-lg" placeholder="Ej: Recarga Telcel.."  formControlName="name" required />
+                        <input type="text" class="form-control form-control-lg" placeholder="Ej: Recarga Telcel.."
+                            formControlName="name" required />
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">DESCRIPCION</label>
-                        <input type="text" class="form-control form-control-lg" placeholder="Ej: 100 pesos de recarga..." formControlName="description" required />
+                        <input type="text" class="form-control form-control-lg"
+                            placeholder="Ej: 100 pesos de recarga..." formControlName="description" required />
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">COMISION</label>
-                        <input type="number" class="form-control form-control-lg" placeholder="EJ: 23" formControlName="commission" required />
+                        <input type="number" class="form-control form-control-lg" placeholder="EJ: 23"
+                            formControlName="commission" required />
                     </div>
                     <div class="mb-3">
                         <div class="mb-3">
                             <label class="form-label fw-semibold">IMAGEN</label>
-                            <input type="file" class="form-control form-control-lg" (change)="selectFile($event)"/>
+
+                            <div class="d-flex gap-3 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="imageMode" id="modeFile"
+                                        [checked]="!urlImageMode" (change)="toggleImageMode()">
+                                    <label class="form-check-label" for="modeFile">Subir Archivo</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="imageMode" id="modeUrl"
+                                        [checked]="urlImageMode" (change)="toggleImageMode()">
+                                    <label class="form-check-label" for="modeUrl">URL de Imagen</label>
+                                </div>
+                            </div>
+
+                            <input *ngIf="!urlImageMode" type="file" class="form-control form-control-lg"
+                                (change)="selectFile($event)" />
+                            <input *ngIf="urlImageMode" type="text" class="form-control form-control-lg"
+                                placeholder="https://ejemplo.com/imagen.jpg" formControlName="imagePath" />
                         </div>
                     </div>
                 </div>
@@ -51,14 +71,14 @@
 
 <!-- Toast de éxito -->
 <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
-  <div #toastElement class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive"
-    aria-atomic="true">
-    <div class="d-flex">
-      <div class="toast-body">
-        {{ toastMessage }}
-      </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-        aria-label="Close"></button>
+    <div #toastElement class="toast align-items-center text-white bg-success border-0" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                {{ toastMessage }}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                aria-label="Close"></button>
+        </div>
     </div>
-  </div>
 </div>
