@@ -7,8 +7,8 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ServiceModel } from '../../interfaces/service.model';
 import { ServiceService } from '../../services/service.service';
-
-
+import { ProductoTemporada } from '../../interfaces/producto-temporada.model';
+import { ProductosTemporadaService } from '../../services/productos-temporada.service';
 
 declare var bootstrap: any;
 
@@ -23,11 +23,18 @@ declare var bootstrap: any;
 export class InicioComponent {
   ProductosActive: boolean = true;
   ServiceActive: boolean = false;
+  SeasonalActive: boolean = false; // Nuevo estado
+
   pluProducto: number | null = null;
   nombreProducto: string | null = null;
   producto: Producto | null = null;
   productosporname: Producto[] = [];
   UnidadesAcobrar: { [id: number]: number } = {};
+
+  // Temporal/Seasonal vars
+  seasonalProducto: ProductoTemporada | null = null;
+  seasonalPorName: ProductoTemporada[] = [];
+
   id: number = 0;
   Carrito: CarritoModel[] = [];
   mostrarCarrito = false;
@@ -40,7 +47,12 @@ export class InicioComponent {
   @ViewChild('toastElement') toastElement!: ElementRef;
   toastMessage: string = '';
 
-  constructor(private ProductosService: ProductosService, private orderservice: OrdersService, private serviceService: ServiceService) {
+  constructor(
+    private ProductosService: ProductosService,
+    private orderservice: OrdersService,
+    private serviceService: ServiceService,
+    private seasonalService: ProductosTemporadaService // Inject new service
+  ) {
     this.cargarCarritoDesdeLocalStorage();
     this.findbyname = false
   }
@@ -92,12 +104,19 @@ export class InicioComponent {
     this.services = [];
     this.producto = null;
     this.productosporname = [];
+    this.seasonalProducto = null;
+    this.seasonalPorName = [];
   }
 
   findbyPLU() {
     if (!this.pluProducto) {
       this.searchbyname();
       return
+    }
+
+    if (this.SeasonalActive) {
+      this.findSeasonalByPLU();
+      return;
     }
 
     this.ProductosService.findPlu(this.pluProducto).subscribe({
@@ -118,13 +137,60 @@ export class InicioComponent {
   searchbyname() {
     if (!this.nombreProducto) return;
 
+    if (this.SeasonalActive) {
+      this.searchSeasonalByName();
+      return;
+    }
+
     this.ProductosService.findbyName(this.nombreProducto).subscribe(data => {
       this.productosporname = data
       this.services = [];
       this.producto = null;
     })
-
   }
+
+  // --- SEASONAL LOGIC ---
+  findSeasonalByPLU() {
+    if (!this.pluProducto) return;
+    this.seasonalService.findPlu(this.pluProducto).subscribe({
+      next: (prod) => {
+        this.seasonalProducto = prod;
+        this.seasonalPorName = [];
+      },
+      error: (err) => {
+        console.error('Error buscando producto temporada:', err);
+        this.seasonalProducto = null;
+      }
+    });
+  }
+
+  searchSeasonalByName() {
+    if (!this.nombreProducto) return;
+    this.seasonalService.findbyName(this.nombreProducto).subscribe({
+      next: (data) => {
+        this.seasonalPorName = data;
+        this.seasonalProducto = null;
+      },
+      error: (err) => {
+        console.error('Error buscando producto temporada por nombre:', err);
+      }
+    });
+  }
+
+  SeasonalAgregarCarrito(id: number, nombre: string, precio: number) {
+    const unidades = this.UnidadesAcobrar[id] || 0;
+    if (!unidades) return;
+
+    const type = 'seasonal';
+    const item: CarritoModel = { type, id, nombre, precio, unidades };
+    this.Carrito.push(item);
+    this.UnidadesAcobrar[id] = 0;
+    this.guardarCarritoEnLocalStorage();
+
+    this.seasonalProducto = null;
+    this.seasonalPorName = [];
+  }
+  // -----------------------
 
   agregar_carrito(id: number, nombre: string, precio: number) {
     const unidades = this.UnidadesAcobrar[id] || 0;
@@ -162,25 +228,25 @@ export class InicioComponent {
         case 'producto':
           this.ProductosService.cobrarProducto(producto.id, producto.unidades).subscribe({
             next: () => { },
-            error: (err) => {
-              alert(err);
-            }
+            error: (err) => { alert(err); }
           });
           break
+        case 'seasonal': // New case
+          this.seasonalService.cobrarProducto(producto.id, producto.unidades).subscribe({
+            next: () => { },
+            error: (err) => { alert(err); }
+          });
+          break;
         case 'orden':
           this.orderservice.cobrarOrden(producto.id).subscribe({
             next: () => { },
-            error: (err) => {
-              alert(err);
-            }
+            error: (err) => { alert(err); }
           });
           break
         case 'servicio':
           this.serviceService.cobrarService(producto.id).subscribe({
             next: () => { },
-            error: (err) => {
-              alert(err);
-            }
+            error: (err) => { alert(err); }
           });
           break
       }
@@ -226,12 +292,19 @@ export class InicioComponent {
   selectProducts() {
     this.ProductosActive = true;
     this.ServiceActive = false;
+    this.SeasonalActive = false;
   }
 
   selectService() {
     this.ServiceActive = true;
     this.ProductosActive = false;
+    this.SeasonalActive = false;
+  }
 
+  selectSeasonal() {
+    this.SeasonalActive = true;
+    this.ProductosActive = false;
+    this.ServiceActive = false;
   }
 
   //services
