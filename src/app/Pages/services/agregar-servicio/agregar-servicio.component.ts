@@ -41,7 +41,7 @@ export class AgregarServicioComponent {
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
       const formData = new FormData();
-      formData.append('imagen', file);
+      formData.append('image', file);
 
       this.serviceService.uploadImage(formData).subscribe({
         next: (res) => {

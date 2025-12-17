@@ -44,7 +44,7 @@ export class AgregarMaquinasComponent {
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
       const formData = new FormData();
-      formData.append('imagen', file);
+      formData.append('image', file);
 
       this.materialservice.uploadImage(formData).subscribe({
         next: (res) => {

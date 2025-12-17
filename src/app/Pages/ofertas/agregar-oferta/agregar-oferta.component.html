@@ -1,0 +1,108 @@
+<!-- Botón para abrir el modal -->
+<div class="text-end mb-4">
+    <button type="button" class="btn btn-danger btn-lg shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal"
+        data-bs-target="#modalAgregarOferta">
+        <i class="bi bi-tag-fill"></i>
+        Nueva Oferta
+    </button>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modalAgregarOferta" tabindex="-1" aria-labelledby="modalAgregarOfertaLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0 rounded-4">
+            <form [formGroup]="ofertaForm" (ngSubmit)="saveOferta()">
+                <div class="modal-header bg-danger text-white rounded-top-4">
+                    <h5 class="modal-title fw-bold" id="modalAgregarOfertaLabel">🔥 AGREGAR OFERTA</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">NOMBRE</label>
+                        <input type="text" class="form-control form-control-lg" placeholder="Ej: Paquete Especial..."
+                            formControlName="NOMBRE" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">PLU</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control form-control-lg" placeholder="Ej: 88888..."
+                                formControlName="PLU" required />
+                            <button class="btn btn-outline-secondary" type="button" (click)="generarPLUAleatorio()">
+                                <i class="bi bi-shuffle"></i> Aleatorio
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">DESCRIPCIÓN</label>
+                        <textarea class="form-control" rows="2" placeholder="Detalles de la oferta..."
+                            formControlName="DESCRIPCION"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-semibold">PRECIO OFERTA</label>
+                            <input type="number" class="form-control form-control-lg" placeholder="$"
+                                formControlName="PRECIO" required />
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-semibold">EXISTENCIA</label>
+                            <input type="number" class="form-control form-control-lg" placeholder="#"
+                                formControlName="EXISTENCIA" required />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-semibold">FECHA INICIO</label>
+                            <input type="date" class="form-control" formControlName="FECHA_INICIO" />
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-semibold">FECHA FIN</label>
+                            <input type="date" class="form-control" formControlName="FECHA_FIN" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">IMAGEN</label>
+                        <div class="d-flex gap-3 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="imageMode" id="modeFile"
+                                    [checked]="!urlImageMode" (change)="toggleImageMode()">
+                                <label class="form-check-label" for="modeFile">Subir Archivo</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="imageMode" id="modeUrl"
+                                    [checked]="urlImageMode" (change)="toggleImageMode()">
+                                <label class="form-check-label" for="modeUrl">URL de Imagen</label>
+                            </div>
+                        </div>
+
+                        <input *ngIf="!urlImageMode" type="file" class="form-control form-control-lg"
+                            (change)="onFileSelected($event)" accept="image/*" />
+                        <input *ngIf="urlImageMode" type="text" class="form-control form-control-lg"
+                            placeholder="https://ejemplo.com/imagen.jpg" formControlName="IMAGE_PATH" />
+
+                        <div *ngIf="imgPath || (urlImageMode && ofertaForm.get('IMAGE_PATH')?.value)"
+                            class="mt-3 text-center">
+                            <img [src]="urlImageMode ? ofertaForm.get('IMAGE_PATH')?.value : imgPath"
+                                class="img-thumbnail rounded shadow-sm" style="max-height: 200px; object-fit: contain;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between px-4 pb-4">
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-danger px-4 fw-bold" [disabled]="ofertaForm.invalid"
+                        data-bs-dismiss="modal">
+                        Guardar Oferta
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

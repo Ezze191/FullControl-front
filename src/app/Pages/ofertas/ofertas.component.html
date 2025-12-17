@@ -1,0 +1,195 @@
+<h2 class="text-center my-5 display-6 fw-semibold text-danger">🔥 OFERTAS ESPECIALES 🔥</h2>
+<app-agregar-oferta (offerAdded)="loadOfertas()"></app-agregar-oferta>
+
+<!-- Botones PDF, Excel, Catálogo y Totales Mejor Acomodados -->
+<div class="d-flex justify-content-between align-items-center flex-wrap mb-4 gap-3">
+    <div class="text-end">
+        <button class="btn btn-outline-danger me-2 d-inline-flex align-items-center gap-1" (click)="exportPDF()">
+            <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+        </button>
+        <button class="btn btn-outline-success me-2 d-inline-flex align-items-center gap-1" (click)="exportExcel()">
+            <i class="bi bi-file-earmark-excel-fill"></i> Excel
+        </button>
+        <button class="btn btn-outline-info d-inline-flex align-items-center gap-1" (click)="exportCatalog()"
+            [disabled]="SpinnerLoading">
+            <span *ngIf="SpinnerLoading" class="spinner-border spinner-border-sm me-1"></span>
+            <i class="bi bi-images"></i> Catálogo
+        </button>
+    </div>
+
+    <div class="text-end">
+        <p class="mb-1 fw-bold text-secondary">
+            TOTAL OFERTAS:
+            <span class="text-success">{{ totalProductos() }}</span>
+        </p>
+        <p class="mb-0 fw-bold text-secondary">
+            VALOR TOTAL (VENTA):
+            <span class="text-success">{{ totalDineroDeVenta() }}</span>
+        </p>
+    </div>
+</div>
+
+<!-- Toolbar de Filtros Avanzados -->
+<div class="card shadow-sm mb-4 border-0 bg-light">
+    <div class="card-body">
+        <h6 class="card-subtitle mb-3 text-muted fw-bold">🔍 Filtros Avanzados</h6>
+        <div class="row g-3">
+            <!-- 1. Buscador General -->
+            <div class="col-12 col-md-3">
+                <label class="form-label small text-muted mb-1">Nombre</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" placeholder="Buscar..." [(ngModel)]="filterName"
+                        (input)="applyFilters()">
+                </div>
+            </div>
+
+            <!-- 2. PLU -->
+            <div class="col-12 col-md-2">
+                <label class="form-label small text-muted mb-1">PLU</label>
+                <div class="input-group input-group-sm">
+                    <input type="number" class="form-control" placeholder="PLU" [(ngModel)]="filterPLU"
+                        (input)="applyFilters()">
+                </div>
+            </div>
+
+            <!-- 3. Rango de Precios -->
+            <div class="col-12 col-md-4">
+                <label class="form-label small text-muted mb-1">Precio ($)</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">$</span>
+                    <input type="number" class="form-control" placeholder="Min" [(ngModel)]="filterPriceMin"
+                        (input)="applyFilters()">
+                    <span class="input-group-text">-</span>
+                    <input type="number" class="form-control" placeholder="Max" [(ngModel)]="filterPriceMax"
+                        (input)="applyFilters()">
+                </div>
+            </div>
+
+            <!-- Dates (Optional visual placeholder as per original filters didn't deeply implement logic in TS yet) -->
+        </div>
+    </div>
+</div>
+
+<!-- Cards -->
+<div class="container-fluid p-0">
+    <div class="row g-4">
+        <div class="col-sm-6 col-lg-4 col-xl-3" *ngFor="let oferta of filteredOfertas">
+            <div class="card h-100 shadow border-0 rounded-4 overflow-hidden card-hover position-relative">
+                <!-- Header color danger for Offers -->
+                <div class="card-header bg-danger text-white text-center">
+                    <div class="badge bg-white text-danger position-absolute top-0 start-0 m-2 shadow-sm">
+                        OFERTA
+                    </div>
+                    <h5 class="mb-0 fw-bold text-uppercase mt-2 text-truncate px-2">{{ oferta.NOMBRE }}</h5>
+                </div>
+
+                <div class="card-body text-center d-flex flex-column">
+                    <div class="position-relative mb-3">
+                        <img [src]="oferta.IMAGE_PATH" class="img-fluid rounded border"
+                            style="max-height: 180px; width: 100%; object-fit: contain;" alt="{{oferta.NOMBRE}}">
+                        <span class="position-absolute bottom-0 end-0 badge bg-danger m-2 fs-6 rounded-pill shadow">
+                            ${{oferta.PRECIO}}
+                        </span>
+                    </div>
+
+                    <ul class="list-unstyled text-start small mb-4 flex-grow-1 px-2">
+                        <li><strong>PLU:</strong> {{ oferta.PLU }}</li>
+                        <li><strong>Existencia:</strong>
+                            <span
+                                [ngClass]="{'text-success': oferta.EXISTENCIA > 0, 'text-danger': oferta.EXISTENCIA === 0}">
+                                {{ oferta.EXISTENCIA }}
+                            </span>
+                        </li>
+                        <li class="text-truncate" title="{{oferta.DESCRIPCION}}"><strong>Desc:</strong> {{
+                            oferta.DESCRIPCION }}</li>
+                        <li><i class="bi bi-calendar-event me-1 text-muted"></i> <strong>Fin:</strong> {{
+                            oferta.FECHA_FIN | date:'shortDate' }}</li>
+                    </ul>
+
+                    <div class="d-grid gap-2 mt-auto">
+                        <button class="btn btn-sm btn-outline-primary rounded-pill fw-bold"
+                            (click)="openEditModal(oferta)">
+                            <i class="bi bi-pencil-fill me-1"></i> Editar
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill fw-bold"
+                            (click)="deleteOferta(oferta.ID_OFERTA)">
+                            <i class="bi bi-trash-fill me-1"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal (Re-styled to match) -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow-lg border-0">
+            <div class="modal-header bg-danger text-white rounded-top-4">
+                <h5 class="modal-title fw-bold">✏️ EDITAR OFERTA</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Nombre</label>
+                            <input type="text" class="form-control" formControlName="NOMBRE">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Precio ($)</label>
+                            <input type="number" class="form-control" formControlName="PRECIO">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Descripción</label>
+                            <textarea class="form-control" formControlName="DESCRIPCION" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Existencia</label>
+                            <input type="number" class="form-control" formControlName="EXISTENCIA">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">PLU</label>
+                            <input type="number" class="form-control" formControlName="PLU" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Fecha Inicio</label>
+                            <input type="date" class="form-control" formControlName="FECHA_INICIO">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Fecha Fin</label>
+                            <input type="date" class="form-control" formControlName="FECHA_FIN">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Imagen</label>
+                            <div class="d-flex gap-3 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" [checked]="!urlImageMode"
+                                        (change)="toggleImageMode()">
+                                    <label class="form-check-label">Archivo</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" [checked]="urlImageMode"
+                                        (change)="toggleImageMode()">
+                                    <label class="form-check-label">URL</label>
+                                </div>
+                            </div>
+                            <input *ngIf="!urlImageMode" type="file" class="form-control"
+                                (change)="onFileSelected($event)">
+                            <input *ngIf="urlImageMode" type="text" class="form-control" formControlName="IMAGE_PATH"
+                                placeholder="Pegar URL...">
+                        </div>
+                    </div>
+                    <div class="modal-footer px-0 pb-0 mt-4">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

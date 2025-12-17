@@ -7,12 +7,20 @@ import { OrdenesComponent } from './Pages/ordenes/ordenes.component';
 import { InicioComponent } from './Pages/inicio/inicio.component';
 import { ServicesComponent } from './Pages/services/services.component';
 import { ProductosTemporadaComponent } from './Pages/productos-temporada/productos-temporada.component';
+import { OfertasComponent } from './Pages/ofertas/ofertas.component';
+import { AgregarOfertaComponent } from './Pages/ofertas/agregar-oferta/agregar-oferta.component';
+import { AgregarProductoTemporadaComponent } from './Pages/productos-temporada/agregar-producto-temporada/agregar-producto-temporada.component';
 
 
 export const routes: Routes = [
     { path: 'inicio', component: InicioComponent },
     { path: 'productos', component: ProductosComponent },
     { path: 'productos-temporada', component: ProductosTemporadaComponent },
+    { path: 'agregar-producto-temporada', component: AgregarProductoTemporadaComponent },
+    { path: 'ofertas', component: OfertasComponent },
+    { path: 'agregar-oferta', component: AgregarOfertaComponent },
+
+    // REDIRECCION POR DEFECTO
     { path: 'servicios', component: ServicesComponent },
     { path: 'inventario', component: InventarioComponent },
     { path: 'ventas', component: VentasComponent },
