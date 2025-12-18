@@ -21,4 +21,4 @@ COPY . .
 EXPOSE 4200
 
 # Comando para iniciar el servidor de desarrollo con hot-reload
-CMD ["ng", "serve", "--host", "0.0.0.0", "--poll", "2000"]
+CMD ["ng", "serve", "--host", "0.0.0.0", "--poll", "2000", "--disable-host-check"]
