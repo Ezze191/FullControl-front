@@ -12,7 +12,7 @@ COPY package*.json ./
 
 # Instalar Angular CLI globalmente y dependencias
 RUN npm install -g @angular/cli@17.3.0 && \
-    npm ci
+    npm install --legacy-peer-deps
 
 # Copiar el código fuente
 COPY . .

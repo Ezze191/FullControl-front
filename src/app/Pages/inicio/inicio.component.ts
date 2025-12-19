@@ -69,19 +69,26 @@ export class InicioComponent {
     this.availableDevices = devices;
     this.hasDevices = Boolean(devices && devices.length);
 
-    // Seleccionar la cámara trasera por defecto si existe, sino la primera
-    if (this.availableDevices.length > 0) {
-      // Filtrar cámaras virtuales (OBS, etc) si es posible para evitar errores de NotReadable
-      const physicalDevices = this.availableDevices.filter(d => !d.label.toLowerCase().includes('obs') && !d.label.toLowerCase().includes('virtual'));
-      const devicesToSearch = physicalDevices.length > 0 ? physicalDevices : this.availableDevices;
+    // Solo intentar seleccionar automáticamente la cámara TRASERA si estamos en móvil.
+    // Si estamos en PC (sin trasera), dejamos que el scanner (y el navegador) elijan la default por sí mismos (currentDevice = undefined)
+    const rearCamera = this.availableDevices.find(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('trasera'));
 
-      // Intenta encontrar la cámara trasera
-      const rearCamera = devicesToSearch.find(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('trasera'));
-
-      // Prioridad: Trasera > Primera Física > Primera General
-      this.currentDevice = rearCamera || devicesToSearch[0] || this.availableDevices[0];
-      console.log('Cámara seleccionada:', this.currentDevice.label);
+    if (rearCamera) {
+      this.currentDevice = rearCamera;
+      console.log('Cámara trasera detectada y seleccionada.', this.currentDevice.label);
+    } else {
+      console.log('Usando cámara por defecto del sistema (sin forzar ID).');
+      this.currentDevice = undefined; // Esto es CLAVE para que no falle si el ID está corrupto
     }
+  }
+
+  reiniciarScanner() {
+    this.scannerEnabled = false;
+    this.currentDevice = undefined;
+    this.retryCount = 0;
+    setTimeout(() => {
+      this.scannerEnabled = true;
+    }, 500);
   }
 
   onPermissionResponse(permission: boolean): void {
