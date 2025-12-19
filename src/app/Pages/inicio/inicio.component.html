@@ -130,9 +130,14 @@
           <label class="form-check-label text-white fw-bold" for="buscarNombre">Buscar Por Nombre</label>
         </div>
       </div>
-      <button class="btn btn-primary btn-lg fw-bold px-5 py-3">
-        <i class="bi bi-search me-2"></i> Buscar
-      </button>
+      <div class="d-flex text-center justify-content-center gap-2">
+        <button type="submit" class="btn btn-primary btn-lg fw-bold px-4 py-3 flex-grow-1">
+          <i class="bi bi-search me-2"></i> Buscar
+        </button>
+        <button type="button" class="btn btn-warning btn-lg fw-bold px-4 py-3 flex-grow-1" (click)="toggleScanner()">
+          <i class="bi bi-upc-scan me-2"></i> Escanear
+        </button>
+      </div>
     </form>
   </div>
 </div>
@@ -346,5 +351,65 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Scanner Overlay Global -->
+<div *ngIf="mostrarScanner"
+  style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background-color: rgba(0, 0, 0, 0.9); display: flex; justify-content: center; align-items: center;">
+  <div class="position-relative bg-white rounded-4 overflow-hidden shadow-lg" style="width: 90%; max-width: 500px;">
+
+    <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+      <h5 class="m-0 fw-bold"><i class="bi bi-upc-scan me-2"></i> Escanear Código</h5>
+      <button class="btn-close" (click)="toggleScanner()"></button>
+    </div>
+
+    <!-- Mensaje de espera (mientras hasPermission es null) -->
+    <div class="p-3 bg-light" *ngIf="hasPermission === null && mostrarScanner && hasPermission !== true">
+      <div class="alert alert-info mb-0 d-flex align-items-center">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+        <span>Iniciando cámara...</span>
+      </div>
+    </div>
+
+    <!-- Mensaje de permiso denegado -->
+    <div class="p-3 bg-light" *ngIf="hasPermission === false && mostrarScanner">
+      <div class="alert alert-warning mb-0">
+        Por favor, permite el acceso a la cámara para escanear.
+      </div>
+    </div>
+
+    <!-- Mensaje de falta de dispositivos -->
+    <div class="p-3 bg-light" *ngIf="hasPermission === true && !hasDevices && mostrarScanner">
+      <div class="alert alert-danger mb-0">
+        No se encontraron cámaras disponibles.
+      </div>
+    </div>
+
+    <!-- Selector de cámara si hay más de una -->
+    <div class="p-2 bg-dark" *ngIf="availableDevices.length > 1">
+      <select class="form-select form-select-sm" (change)="onDeviceSelectChange($any($event.target).value)">
+        <option *ngFor="let device of availableDevices" [value]="device.deviceId"
+          [selected]="currentDevice && device.deviceId === currentDevice.deviceId">
+          {{device.label}}
+        </option>
+      </select>
+    </div>
+
+    <!-- El scanner debe estar presente para pedir permisos -->
+    <div class="p-0 bg-dark position-relative" [class.d-none]="hasPermission === false">
+      <zxing-scanner #scanner [enable]="scannerEnabled" [device]="currentDevice" (camerasFound)="onCamerasFound($event)"
+        (permissionResponse)="onPermissionResponse($event)" (scanSuccess)="onCodeResult($event)"
+        (scanError)="onScanError($event)" [tryHarder]="true">
+      </zxing-scanner>
+      <!-- Guías visuales tipo laser -->
+      <div class="position-absolute top-50 start-0 w-100 border-top border-danger border-2 opacity-50"
+        style="pointer-events: none;"></div>
+    </div>
+
+    <div class="p-3 text-center bg-light">
+      <small class="text-muted">Apunte la cámara al código de barras</small>
+    </div>
+
   </div>
 </div>

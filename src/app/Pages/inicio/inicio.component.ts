@@ -14,10 +14,12 @@ import { Oferta } from '../../interfaces/oferta.model';
 
 declare var bootstrap: any;
 
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
+
 @Component({
   selector: 'app-inicio',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ZXingScannerModule],
   templateUrl: './inicio.component.html',
   styleUrl: './inicio.component.css'
 })
@@ -34,8 +36,66 @@ export class InicioComponent {
   nombreService: string | null = null;
   findbyname: boolean = false;
 
+  // Scanner
+  mostrarScanner: boolean = false;
+  scannerEnabled: boolean = false;
+  availableDevices: MediaDeviceInfo[] = [];
+  currentDevice: MediaDeviceInfo | undefined;
+  hasDevices: boolean = false;
+  hasPermission: boolean | null = null;
+
   // Results
   producto: Producto | null = null;
+
+  // ... (existing constructor)
+
+  toggleScanner() {
+    this.mostrarScanner = !this.mostrarScanner;
+    this.scannerEnabled = this.mostrarScanner;
+    if (this.mostrarScanner) {
+      console.log('Scanner activado. Esperando permisos y dispositivos...');
+      this.hasPermission = null;
+
+      // Check for non-secure context (HTTP) specifically for potential camera issues
+      if (typeof window !== 'undefined' && !window.isSecureContext && window.location.hostname !== 'localhost') {
+        alert('ADVERTENCIA: La cámara podría no funcionar en este dispositivo porque la conexión no es segura (HTTP).\n\nPara que funcione en móviles/tablets, debes habilitar el flag "Insecure origins treated as secure" en chrome://flags y agregar: ' + window.location.origin);
+      }
+      this.cdr.detectChanges();
+    }
+  }
+
+  onCamerasFound(devices: MediaDeviceInfo[]): void {
+    console.log('Cámaras encontradas:', devices);
+    this.availableDevices = devices;
+    this.hasDevices = Boolean(devices && devices.length);
+
+    // Seleccionar la cámara trasera por defecto si existe, sino la primera
+    if (this.availableDevices.length > 0) {
+      // Filtrar cámaras virtuales (OBS, etc) si es posible para evitar errores de NotReadable
+      const physicalDevices = this.availableDevices.filter(d => !d.label.toLowerCase().includes('obs') && !d.label.toLowerCase().includes('virtual'));
+      const devicesToSearch = physicalDevices.length > 0 ? physicalDevices : this.availableDevices;
+
+      // Intenta encontrar la cámara trasera
+      const rearCamera = devicesToSearch.find(device => device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('trasera'));
+
+      // Prioridad: Trasera > Primera Física > Primera General
+      this.currentDevice = rearCamera || devicesToSearch[0] || this.availableDevices[0];
+      console.log('Cámara seleccionada:', this.currentDevice.label);
+    }
+  }
+
+  onPermissionResponse(permission: boolean): void {
+    console.log('Permiso de cámara:', permission);
+    this.hasPermission = permission;
+  }
+
+  onDeviceSelectChange(selected: string) {
+    console.log('Cambio de dispositivo:', selected);
+    const device = this.availableDevices.find(x => x.deviceId === selected);
+    if (device) {
+      this.currentDevice = device;
+    }
+  }
   productosporname: Producto[] = [];
 
   seasonalProducto: ProductoTemporada | null = null;
@@ -97,6 +157,46 @@ export class InicioComponent {
     this.resetSearch();
   }
 
+  onCodeResult(resultString: string) {
+    if (!resultString) return;
+
+    this.mostrarScanner = false;
+    this.scannerEnabled = false;
+
+    // Intentar convertir a numero (PLU)
+    const plu = Number(resultString);
+    if (!isNaN(plu)) {
+      this.pluProducto = plu;
+      this.findbyPLU(true); // Pasar flag para indicar que viene del scanner y queremos agregar directo
+    } else {
+      alert('Código escaneado no es numérico válido para PLU: ' + resultString);
+    }
+  }
+
+  retryCount: number = 0;
+
+  onScanError(error: any) {
+    console.error('Error del escáner:', error);
+    // Verificar si es un error de "Dispositivo en uso" o "No legible"
+    if (error && (error.name === 'NotReadableError' || error.message?.includes('NotReadableError') || error.message?.includes('Could not start video source'))) {
+
+      // Intento de recuperación automática 1: Probar con la cámara por defecto del sistema si falló una específica
+      if (this.currentDevice && this.retryCount === 0) {
+        console.warn('Fallo al iniciar cámara específica. Reintentando con cámara por defecto del sistema...');
+        this.retryCount++;
+        this.currentDevice = undefined; // Quitar dispositivo específico para dejar que el navegador elija
+        this.scannerEnabled = false;
+        setTimeout(() => {
+          this.scannerEnabled = true;
+        }, 200);
+        return;
+      }
+
+      alert('ERROR DE CÁMARA (Bloqueada o no disponible):\n\nWindows no permite usar la cámara. Sigue estos pasos:\n\n1. Ve a "Configuración" de Windows -> "Privacidad" -> "Cámara".\n2. Asegúrate de que "Permitir que las aplicaciones accedan a la cámara" esté ACTIVADO.\n3. Asegúrate de que tu navegador (Chrome/Edge) tenga permiso en esa lista.\n4. Cierra cualquier otra app que use cámara (Zoom, Skype, OBS).\n5. Reinicia el navegador.');
+      this.retryCount = 0; // Reset para la próxima
+    }
+  }
+
   resetSearch() {
     this.pluProducto = null;
     this.nombreProducto = null;
@@ -116,19 +216,19 @@ export class InicioComponent {
   }
 
   // --- SEARCH LOGIC ---
-  findbyPLU() {
+  findbyPLU(autoAdd: boolean = false) {
     if (!this.pluProducto || this.findbyname) {
       this.searchbyname();
       return;
     }
 
     if (this.SeasonalActive) {
-      this.findSeasonalByPLU();
+      this.findSeasonalByPLU(autoAdd);
       return;
     }
 
     if (this.OfertasActive) {
-      this.findOfertaByPLU();
+      this.findOfertaByPLU(autoAdd);
       return;
     }
 
@@ -136,9 +236,14 @@ export class InicioComponent {
     this.productosService.findPlu(this.pluProducto).subscribe({
       next: (data) => {
         this.producto = data;
+        if (autoAdd && this.producto) {
+          this.UnidadesAcobrar[this.producto.ID_PRODUCT] = 1;
+          this.agregar_carrito(this.producto.ID_PRODUCT, this.producto.NOMBRE, this.producto.PRECIO_VENTA);
+        }
       },
       error: () => {
         this.producto = null;
+        if (autoAdd) alert('Producto no encontrado con PLU: ' + this.pluProducto);
       }
     });
   }
@@ -162,11 +267,20 @@ export class InicioComponent {
     });
   }
 
-  findSeasonalByPLU() {
+  findSeasonalByPLU(autoAdd: boolean = false) {
     if (!this.pluProducto) return;
     this.seasonalService.findPlu(this.pluProducto).subscribe({
-      next: (data) => { this.seasonalProducto = data; },
-      error: () => { this.seasonalProducto = null; }
+      next: (data) => {
+        this.seasonalProducto = data;
+        if (autoAdd && this.seasonalProducto) {
+          this.UnidadesAcobrar[this.seasonalProducto.ID_PRODUCT] = 1;
+          this.SeasonalAgregarCarrito(this.seasonalProducto.ID_PRODUCT, this.seasonalProducto.NOMBRE, this.seasonalProducto.PRECIO_VENTA);
+        }
+      },
+      error: () => {
+        this.seasonalProducto = null;
+        if (autoAdd) alert('Producto de temporada no encontrado con PLU: ' + this.pluProducto);
+      }
     });
   }
 
@@ -177,11 +291,20 @@ export class InicioComponent {
     });
   }
 
-  findOfertaByPLU() {
+  findOfertaByPLU(autoAdd: boolean = false) {
     if (!this.pluProducto) return;
     this.ofertasService.findPlu(this.pluProducto).subscribe({
-      next: (data) => { this.ofertaProducto = data; },
-      error: () => { this.ofertaProducto = null; }
+      next: (data) => {
+        this.ofertaProducto = data;
+        if (autoAdd && this.ofertaProducto) {
+          this.UnidadesAcobrar[this.ofertaProducto.ID_OFERTA] = 1;
+          this.OfertaAgregarCarrito(this.ofertaProducto.ID_OFERTA, this.ofertaProducto.NOMBRE, this.ofertaProducto.PRECIO);
+        }
+      },
+      error: () => {
+        this.ofertaProducto = null;
+        if (autoAdd) alert('Oferta no encontrada con PLU: ' + this.pluProducto);
+      }
     });
   }
 

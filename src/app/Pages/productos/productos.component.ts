@@ -1,6 +1,6 @@
 import { AgregarProductoComponent } from './agregar-producto/agregar-producto.component';
-import { Component, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ViewChild, ElementRef, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ProductosService } from '../../services/productos.service';
 import { Producto } from '../../interfaces/producto.model';
 //estas importaciones son para crear un formulario y poder editarlas
@@ -70,10 +70,10 @@ export class ProductosComponent {
 
 
 
-  //esto manda a llamar automaticamente cuando inicia el componente a los productos
   constructor(
     private productoService: ProductosService,
     private fbEdit: FormBuilder,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
   //esto carga los productos automaticamente cuando se mande a llamar los productos
@@ -259,42 +259,56 @@ export class ProductosComponent {
   }
 
 
-  generarPDFConBarras(producto: any) {
-    const doc = new jsPDF();
-
-    const ancho = 15;
-    const alto = 5;
-    const espacioHorizontal = 35;
-    const espacioVertical = 20;
-    const margenY = 5;
-
-    const paginaAncho = doc.internal.pageSize.getWidth();
-    const paginaAlto = doc.internal.pageSize.getHeight();
-
-    const columnas = Math.floor(paginaAncho / espacioHorizontal);
-    const filas = Math.floor((paginaAlto - margenY * 2) / espacioVertical);
-    const totalAnchoContenido = columnas * espacioHorizontal;
-    const margenX = (paginaAncho - totalAnchoContenido) / 2;
-
-    for (let fila = 0; fila < filas; fila++) {
-      for (let col = 0; col < columnas; col++) {
-        const x = margenX + col * espacioHorizontal;
-        const y = margenY + fila * espacioVertical;
-
-
-        const texto = String(producto.PLU);
-        doc.setFontSize(10);
-        const textWidth = doc.getTextWidth(texto);
-        const centerX = x + ancho / 2 - textWidth / 2;
-
-
-        doc.rect(x, y, ancho, alto);
-
-        doc.text(texto, centerX, y + alto / 2 + 2);
-      }
+  async generarPDFConBarras(producto: any) {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
     }
 
-    doc.save(`CODIGOS - ${producto.NOMBRE}.pdf`);
+    try {
+      // Importar dinámicamente bwip-js
+      const bwipjs = await import('bwip-js');
+
+      const doc = new jsPDF();
+      const plu = String(producto.PLU);
+      const nombre = String(producto.NOMBRE);
+
+      // Crear un canvas temporal para generar el código de barras
+      const canvas = document.createElement('canvas');
+
+      // Generar el código de barras en el canvas usando bwip-js
+      (bwipjs as any).toCanvas(canvas, {
+        bcid: 'code128',       // Tipo de código de barras
+        text: plu,             // Texto a codificar (PLU)
+        scale: 3,              // Factor de escala
+        height: 10,            // Altura de las barras
+        includetext: true,     // Incluir el texto legible humanamente
+        textxalign: 'center',  // Alinear el texto al centro
+      });
+
+      // Obtener la imagen en base64 desde el canvas
+      const imgData = canvas.toDataURL('image/png');
+
+      // Calcular la posición central en el PDF
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const imgWidth = 60; // Ancho deseado de la imagen en el PDF
+      const imgHeight = 30; // Alto deseado de la imagen en el PDF
+      const x = (pageWidth - imgWidth) / 2;
+      const y = 20;
+
+      // Agregar título
+      doc.setFontSize(16);
+      doc.text(nombre, pageWidth / 2, 15, { align: 'center' });
+
+      // Agregar la imagen del código de barras al PDF
+      doc.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+
+      // Guardar el PDF
+      doc.save(`CODIGO-${nombre}.pdf`);
+
+    } catch (e) {
+      console.error('Error al generar el código de barras:', e);
+      alert('Error al generar el código de barras. Verifique que el PLU sea válido.');
+    }
   }
 
   totalDineroDeVenta(): number {
