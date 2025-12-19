@@ -10,6 +10,7 @@ import { ProductosTemporadaComponent } from './Pages/productos-temporada/product
 import { OfertasComponent } from './Pages/ofertas/ofertas.component';
 import { AgregarOfertaComponent } from './Pages/ofertas/agregar-oferta/agregar-oferta.component';
 import { AgregarProductoTemporadaComponent } from './Pages/productos-temporada/agregar-producto-temporada/agregar-producto-temporada.component';
+import { ScannerRemoteComponent } from './Pages/scanner-remote/scanner-remote.component';
 
 
 import { DashboardComponent } from './Pages/dashboard/dashboard.component';
@@ -17,6 +18,7 @@ import { DashboardComponent } from './Pages/dashboard/dashboard.component';
 
 export const routes: Routes = [
     { path: 'dashboard', component: DashboardComponent },
+    { path: 'scanner-remote', component: ScannerRemoteComponent },
     { path: 'cobrar', component: InicioComponent },
     { path: 'inicio', redirectTo: '/dashboard', pathMatch: 'full' },
     { path: 'productos', component: ProductosComponent },

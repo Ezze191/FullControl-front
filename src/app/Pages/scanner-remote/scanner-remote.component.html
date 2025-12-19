@@ -1,0 +1,92 @@
+<!-- Pantalla completa optimizada para móvil -->
+<div class="scanner-remote-container">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="title">📱 Escáner Remoto</h1>
+                <p class="subtitle">Escanea códigos para el POS</p>
+            </div>
+            <button class="btn btn-sm btn-light" (click)="goToPOS()">
+                <i class="bi bi-arrow-left"></i> POS
+            </button>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="status-item">
+            <i class="bi bi-wifi text-success"></i>
+            <span>Conectado</span>
+        </div>
+        <div class="status-item">
+            <i class="bi bi-upc-scan"></i>
+            <span>{{ scanCount }} escaneados</span>
+        </div>
+        <button class="btn btn-sm btn-outline-light" (click)="resetCounter()">
+            <i class="bi bi-arrow-clockwise"></i>
+        </button>
+    </div>
+
+    <!-- Last Scanned Feedback -->
+    <div class="scan-feedback" *ngIf="lastScannedCode">
+        <div class="scan-success">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>{{ lastScannedCode }}</span>
+            <small>Enviado al POS</small>
+        </div>
+    </div>
+
+    <!-- Permission Messages -->
+    <div class="message-container" *ngIf="hasPermission === null">
+        <div class="alert alert-info">
+            <div class="spinner-border spinner-border-sm me-2"></div>
+            Solicitando acceso a la cámara...
+        </div>
+    </div>
+
+    <div class="message-container" *ngIf="hasPermission === false">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Por favor, permite el acceso a la cámara
+        </div>
+    </div>
+
+    <div class="message-container" *ngIf="hasPermission === true && !hasDevices">
+        <div class="alert alert-danger">
+            <i class="bi bi-camera-video-off me-2"></i>
+            No se encontraron cámaras
+        </div>
+    </div>
+
+    <!-- Camera Selector -->
+    <div class="camera-selector" *ngIf="availableDevices.length > 1">
+        <select class="form-select" (change)="onDeviceSelectChange($any($event.target).value)">
+            <option *ngFor="let device of availableDevices" [value]="device.deviceId"
+                [selected]="currentDevice && device.deviceId === currentDevice.deviceId">
+                {{ device.label }}
+            </option>
+        </select>
+    </div>
+
+    <!-- Scanner View -->
+    <div class="scanner-view" [class.d-none]="hasPermission === false">
+        <zxing-scanner #scanner [enable]="scannerEnabled" [device]="currentDevice"
+            (camerasFound)="onCamerasFound($event)" (permissionResponse)="onPermissionResponse($event)"
+            (scanSuccess)="onCodeResult($event)" (scanError)="onScanError($event)" [tryHarder]="true">
+        </zxing-scanner>
+
+        <!-- Scan Guide Overlay -->
+        <div class="scan-guide">
+            <div class="scan-line"></div>
+            <p class="scan-instruction">Apunta al código de barras</p>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="instructions">
+        <p><i class="bi bi-info-circle me-2"></i>Los productos se agregarán automáticamente al POS</p>
+    </div>
+
+</div>

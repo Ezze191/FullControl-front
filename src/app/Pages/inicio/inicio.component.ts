@@ -11,6 +11,8 @@ import { ProductoTemporada } from '../../interfaces/producto-temporada.model';
 import { ProductosTemporadaService } from '../../services/productos-temporada.service';
 import { OfertasService } from '../../services/ofertas.service';
 import { Oferta } from '../../interfaces/oferta.model';
+import { ScannerSyncService } from '../../services/scanner-sync.service';
+import { Subscription } from 'rxjs';
 
 declare var bootstrap: any;
 
@@ -122,14 +124,39 @@ export class InicioComponent {
   @ViewChild('modalCobrar') modalCobrarElement!: ElementRef;
   modalBootstrap: any;
 
+  // Remote scanner subscription
+  private remoteScanSubscription?: Subscription;
+
   constructor(
     private productosService: ProductosService,
     private cdr: ChangeDetectorRef,
     private ordersService: OrdersService,
     private serviceService: ServiceService,
     private seasonalService: ProductosTemporadaService,
-    private ofertasService: OfertasService
+    private ofertasService: OfertasService,
+    private scannerSync: ScannerSyncService
   ) { }
+
+  ngOnInit(): void {
+    // Escuchar códigos del escáner remoto
+    this.remoteScanSubscription = this.scannerSync.scannedCode$.subscribe(code => {
+      if (code) {
+        console.log('📱 Código recibido del escáner remoto:', code);
+        const plu = Number(code);
+        if (!isNaN(plu)) {
+          this.pluProducto = plu;
+          this.findbyPLU(true); // Auto-agregar al carrito
+        }
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    // Limpiar suscripción
+    if (this.remoteScanSubscription) {
+      this.remoteScanSubscription.unsubscribe();
+    }
+  }
 
   // --- SELECTION MODES ---
   selectProducts() {
