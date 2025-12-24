@@ -16,9 +16,9 @@ export class ProductosService {
     this.productosActualizados.next(true);
   }
 
-  
+
   private ApiUrl = `http://${IP}/Software_FullControl/FullControl_System/public/api/`
-  
+
   constructor(private http: HttpClient) { }
 
   //obtener los productos
@@ -59,7 +59,7 @@ export class ProductosService {
     return this.http.get<Producto>(url)
   }
 
-  findbyName(name : string) : Observable<Producto[]>{
+  findbyName(name: string): Observable<Producto[]> {
     const url = `${this.ApiUrl}ProductoNombre/${name}`;
     return this.http.get<Producto[]>(url)
   }
@@ -70,4 +70,11 @@ export class ProductosService {
     const url = `${this.ApiUrl}cobrar/${id}/${unidades}`
     return this.http.post(url, {})
   }
+
+  //descargar PDF de códigos de barras
+  downloadBarcodePDF(id: number): Observable<Blob> {
+    const url = `${this.ApiUrl}barcode/${id}`;
+    return this.http.get(url, { responseType: 'blob' });
+  }
 }
+

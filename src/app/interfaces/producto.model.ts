@@ -1,12 +1,12 @@
-export interface Producto{
+export interface Producto {
     ID_PRODUCT: number,
-    PLU: number, 
+    PLU: number,
     NOMBRE: string,
-    EXISTENCIA : number,
+    EXISTENCIA: number,
     PRECIO_COMPRA: number,
     PRECIO_VENTA: number,
     GANANCIA: number,
     PROVEDOR: Text,
     ULTIMO_INGRESO: string,
-    IMAGE_PATH: string 
+    IMAGE_PATH: string
 }

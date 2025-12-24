@@ -260,42 +260,34 @@ export class ProductosComponent {
 
 
   generarPDFConBarras(producto: any) {
-    const doc = new jsPDF();
+    this.productoService.downloadBarcodePDF(producto.ID_PRODUCT).subscribe({
+      next: (blob) => {
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `CODIGOS-${producto.NOMBRE}.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
 
-    const ancho = 15;
-    const alto = 5;
-    const espacioHorizontal = 35;
-    const espacioVertical = 20;
-    const margenY = 5;
-
-    const paginaAncho = doc.internal.pageSize.getWidth();
-    const paginaAlto = doc.internal.pageSize.getHeight();
-
-    const columnas = Math.floor(paginaAncho / espacioHorizontal);
-    const filas = Math.floor((paginaAlto - margenY * 2) / espacioVertical);
-    const totalAnchoContenido = columnas * espacioHorizontal;
-    const margenX = (paginaAncho - totalAnchoContenido) / 2;
-
-    for (let fila = 0; fila < filas; fila++) {
-      for (let col = 0; col < columnas; col++) {
-        const x = margenX + col * espacioHorizontal;
-        const y = margenY + fila * espacioVertical;
-
-
-        const texto = String(producto.PLU);
-        doc.setFontSize(10);
-        const textWidth = doc.getTextWidth(texto);
-        const centerX = x + ancho / 2 - textWidth / 2;
-
-
-        doc.rect(x, y, ancho, alto);
-
-        doc.text(texto, centerX, y + alto / 2 + 2);
+        // Show toast
+        this.toastMessage = 'PDF de códigos de barras generado correctamente';
+        const toast = new bootstrap.Toast(this.toastElement.nativeElement, {
+          delay: 5000
+        });
+        toast.show();
+      },
+      error: (err) => {
+        console.error('Error al generar PDF de códigos de barras:', err);
+        this.toastMessage = 'Error al generar PDF de códigos de barras';
+        const toast = new bootstrap.Toast(this.toastElement.nativeElement, {
+          delay: 5000
+        });
+        toast.show();
       }
-    }
-
-    doc.save(`CODIGOS - ${producto.NOMBRE}.pdf`);
+    });
   }
+
 
   totalDineroDeVenta(): number {
     return this.productosFiltrados.reduce((total, producto) => {
